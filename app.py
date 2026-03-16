@@ -1,8 +1,6 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from config import Config
-
-db = SQLAlchemy()
+from extensions import db
 
 def create_app():
     app = Flask(__name__)
@@ -10,11 +8,11 @@ def create_app():
 
     db.init_app(app)
 
-    from controllers.movie_controller import movie_bp
+    from controller.filme_controller import movie_bp
     app.register_blueprint(movie_bp)
 
     with app.app_context():
-        from models.search_model import Search
+        from models.pesquisa import Search
         db.create_all()
 
     return app

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pesquisa de Filmes</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Pesquisar Filme</h1>
+
+    <div class="search-box">
+      <input type="text" id="movieInput" placeholder="Digite o nome do filme">
+      <button onclick="buscarFilme()">Pesquisar</button>
+    </div>
+
+    <div id="resultado"></div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

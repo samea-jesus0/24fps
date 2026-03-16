@@ -1,14 +1,19 @@
+* {
+    box-sizing: border-box;
+}
+
 body {
     font-family: Arial, sans-serif;
-    background: #111827;
-    color: white;
+    background: #4D4C57;
+    color: #F7F3E6;
     margin: 0;
     padding: 0;
 }
 
 .container {
-    width: 80%;
+    width: min(100%, 1100px);
     margin: 40px auto;
+    padding: 0 16px;
     text-align: center;
 }
 
@@ -18,10 +23,16 @@ h1 {
 
 .search-box {
     margin-bottom: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .search-box input {
-    width: 300px;
+    flex: 1;
+    min-width: 200px;
+    max-width: 300px;
     padding: 12px;
     border-radius: 8px;
     border: none;
@@ -32,18 +43,19 @@ h1 {
     padding: 12px 18px;
     border: none;
     border-radius: 8px;
-    background: #2563eb;
-    color: white;
+    background: #FFCC74;
+    color: #2A2A34;
     cursor: pointer;
-    margin-left: 10px;
+    white-space: nowrap;
 }
 
 .search-box button:hover {
-    background: #1d4ed8;
+    background: #ffe1ac;
+    color: #2A2A34;
 }
 
 .card {
-    background: #1f2937;
+    background: #2A2A34;
     border-radius: 16px;
     padding: 20px;
     display: flex;
@@ -51,6 +63,7 @@ h1 {
     align-items: flex-start;
     text-align: left;
     max-width: 900px;
+    color: #F7F3E6;
     margin: 0 auto;
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
@@ -71,4 +84,45 @@ h1 {
 .erro {
     color: #f87171;
     font-weight: bold;
+}
+
+/* Responsividade para telas menores (notebooks e dispositivos móveis) */
+@media (max-width: 768px) {
+    body {
+        font-size: 14px; /* Reduz o tamanho da fonte para telas menores */
+    }
+
+    .container {
+        margin: 20px auto; /* Reduz a margem superior/inferior */
+        padding: 0 8px; /* Reduz o padding lateral */
+    }
+
+    h1 {
+        margin-bottom: 15px; /* Reduz o espaçamento abaixo do título */
+        font-size: 1.5em; /* Ajusta o tamanho do título */
+    }
+
+    .search-box {
+        flex-direction: column; /* Empilha input e botão verticalmente */
+        align-items: center;
+        gap: 15px;
+    }
+
+    .search-box input {
+        min-width: 250px; /* Ajusta largura mínima */
+        max-width: 100%; /* Permite ocupar toda a largura */
+    }
+
+    .card {
+        flex-direction: column; /* Empilha imagem e info verticalmente */
+        align-items: center;
+        text-align: center;
+        padding: 15px; /* Reduz padding */
+        gap: 15px; /* Reduz gap */
+    }
+
+    .card img {
+        width: 100%; /* Imagem ocupa toda a largura disponível */
+        max-width: 250px; /* Limita largura máxima */
+    }
 }

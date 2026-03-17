@@ -1,6 +1,10 @@
 import os
 
 class Config:
-    SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:Guapitos123$@localhost/filmes_24fps"
+    api_key = os.getenv("API_KEY")
+    db_password = os.getenv("DB_PASSWORD")
+    SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://root:{db_password}@localhost/filmes_24fps"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    OMDB_API_KEY = "3b854b62"
+    OMDB_API_KEY = api_key
+    
+    

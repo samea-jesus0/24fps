@@ -26,3 +26,5 @@ def buscar():
         return jsonify({"erro": "Filme não encontrado"}), 404
 
     return jsonify(filme)
+
+

@@ -12,12 +12,14 @@ def create_app():
     db.init_app(app)
 
     from controller.filme_controller import movie_bp
+    from controller.perfil_controller import perfil_bp
     app.register_blueprint(movie_bp)
+    app.register_blueprint(perfil_bp)
 
     with app.app_context():
         from models.pesquisa import Search
         db.create_all()
-
+        
     return app
 
 app = create_app()

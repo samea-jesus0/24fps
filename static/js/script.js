@@ -38,3 +38,7 @@ async function buscarFilme() {
         resultado.innerHTML = `<p class="erro">Erro ao buscar o filme.</p>`;
     }
 }
+
+function redirecionar_perfil() {
+    window.open("/perfil", "_blank");
+}

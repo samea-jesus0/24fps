@@ -1,8 +1,19 @@
 async function buscarFilme() {
     const nome = document.getElementById("movieInput").value;
-    const resultado = document.getElementById("resultado");
+    const toast = document.getElementById("toast");
+
+      // Mostra
+      setTimeout(() => {
+        toast.classList.add("show");
+      }, 100);
+
+      // Esconde depois de 3 segundos
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 3000);
 
     resultado.innerHTML = "<p>Carregando...</p>";
+    const resultado = document.getElementById("resultado");
 
     try {
         const response = await fetch("/buscar", {
@@ -39,6 +50,25 @@ async function buscarFilme() {
     }
 }
 
+function redirecionar_login() {
+    window.open("/login", "_blank");
+}
+
 function redirecionar_perfil() {
-    window.open("/perfil", "_blank");
+    window.open("/perfil");
+}
+
+function previewImage(event) {
+    const input = event.target;
+    const preview = document.getElementById('preview');
+
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+        }
+
+        reader.readAsDataURL(input.files[0]);
+    }
 }

@@ -23,6 +23,11 @@
     padding: 0;
 }
 
+.nav-bar ul li:hover {
+    color : #FFCC74;
+
+}
+
 .perfil-title {
     font-size: 6em;
     font-weight: bold;

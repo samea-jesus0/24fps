@@ -11,11 +11,11 @@
 <body>
   <nav class="nav-bar">
     <p class="marca">24FPS</p>
-    <ul>
+    <!--<ul>
       <li><a href="/">Home</a></li>
       <li><a href="/about">Sobre</a></li>
       <li><a href="/contact">Contato</a></li>
-    </ul>
+    </ul>-->
   <div onclick="redirecionar_perfil()">
     <img class="circulo" id="preview"
         src="{{ url_for('static', filename='uploads/' + (current_user.foto or 'default.png')) }}?{{ range(1,1000)|random }}"

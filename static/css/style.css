@@ -103,7 +103,7 @@ h1 {
     max-width: 900px;
     color: #2A2A34;
     margin: 0 auto;
-    box-shadow: 0 15px 15px rgba(107, 75, 44);
+    box-shadow: 0 0 30px rgba(0,0,0,0.2);
 }
 
 .card img {
@@ -114,13 +114,15 @@ h1 {
 .circulo {
   width: 100px;
   height: 100px;
-  background-color: #ebe4d7;
+  transition: all 0.3s ease;
+  cursor: pointer;
   border-radius: 50%;
 }
 
 .circulo:hover {
-  background-color: #435fdd;
-  transition: background-color 0.3s ease;
+  background-color: #FFCC74;
+  transform: scale(1.08);
+  box-shadow: 0 0 12px #FFCC74;
 }
 
 .info {

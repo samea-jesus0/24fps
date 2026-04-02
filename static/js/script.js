@@ -2,6 +2,14 @@ async function buscarFilme() {
     const nome = document.getElementById("movieInput").value;
     const resultado = document.getElementById("resultado");
 
+    setTimeout(() => {
+        toast.classList.add("show");
+      }, 100);
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+      }, 3000);
+
     resultado.innerHTML = "<p>Carregando...</p>";
 
     try {
@@ -39,6 +47,29 @@ async function buscarFilme() {
     }
 }
 
+function redirecionar_login() {
+    window.open("/login", "_blank");
+}
+
 function redirecionar_perfil() {
-    window.open("/perfil", "_blank");
+    window.open("/perfil");
+}
+
+function redirecionar_pesquisa() {
+    window.open("/pesquisa");
+}
+
+function previewImage(event) {
+    const input = event.target;
+    const preview = document.getElementById('preview');
+
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+        }
+
+        reader.readAsDataURL(input.files[0]);
+    }
 }

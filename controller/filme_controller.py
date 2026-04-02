@@ -5,7 +5,7 @@ from service.filme_service import buscar_filme_por_nome
 
 movie_bp = Blueprint("movie", __name__)
 
-@movie_bp.route("/")
+@movie_bp.route("/pesquisa")
 def index():
     return render_template("index.html")
 

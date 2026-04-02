@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styleLogin.css') }}">
+    <title>PERFIL</title>
+</head>
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div id="toast" class="toast">
+      {% for message in messages %}
+        <p>{{ message }}</p>
+      {% endfor %}
+    </div>
+
+    <script>
+      const toast = document.getElementById("toast");
+
+      setTimeout(() => {
+        toast.classList.add("show");
+      }, 100);
+
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 3000);
+    </script>
+  {% endif %}
+{% endwith %}
+<body>
+  <nav class="nav-bar">
+    <p class="marca">24FPS</p>
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="/about">Sobre</a></li>
+      <li><a href="/contact">Contato</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+
+    <!-- LOGIN -->
+    <div class="card">
+      <h2>Login</h2>
+      <form action="{{ url_for('auth.login') }}" method="POST">
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="senha" placeholder="Senha" required>
+        <button type="submit" onclick="r">Entrar</button>
+      </form>
+    </div>
+
+    <!-- CADASTRO -->
+    <div class="card">
+      <h2>Cadastro</h2>
+      <form action="{{ url_for('auth.register') }}" method="POST" enctype="multipart/form-data">
+        <input type="text" name="nome" placeholder="Nome" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="senha" placeholder="Senha" required>
+
+        <label>Foto de perfil:</label>
+        <input type="file" name="foto">
+
+        <button type="submit">Cadastrar</button>
+      </form>
+    </div>
+
+  </div>
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

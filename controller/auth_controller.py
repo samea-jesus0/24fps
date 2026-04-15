@@ -1,76 +1,108 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.utils import secure_filename
 from models.user import User
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 import os
 import uuid
 from extensions import db, login_manager
 
-auth = Blueprint('auth', __name__)
+auth = Blueprint("auth", __name__)
+DEFAULT_AVATAR = "default-avatar.svg"
+
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in current_app.config['ALLOWED_EXTENSIONS']
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in current_app.config["ALLOWED_EXTENSIONS"]
 
 
-@auth.route('/', methods=['GET', 'POST'])
+def normalize_photo_position(value):
+    try:
+        return max(0, min(100, int(float(value))))
+    except (TypeError, ValueError):
+        return 50
+
+
+@auth.route("/")
+def home():
+    if current_user.is_authenticated:
+        return redirect(url_for("movie.index"))
+    return redirect(url_for("auth.login"))
+
+
+@auth.route("/cadastro", methods=["GET", "POST"])
 def register():
-    if request.method == 'POST':
-        nome = request.form['nome']
-        email = request.form['email']
-        senha = generate_password_hash(request.form['senha'])
+    if current_user.is_authenticated:
+        return redirect(url_for("movie.index"))
 
-        # Verifica se já existe
+    if request.method == "POST":
+        nome = request.form["nome"]
+        email = request.form["email"]
+        senha = generate_password_hash(request.form["senha"])
+        foto_pos_x = normalize_photo_position(request.form.get("foto_pos_x", 50))
+        foto_pos_y = normalize_photo_position(request.form.get("foto_pos_y", 50))
+
         if User.query.filter_by(email=email).first():
-            flash('Email já cadastrado')
-            return redirect(url_for('auth.login'))
+            flash("Email ja cadastrado")
+            return redirect(url_for("auth.register"))
 
-        foto_nome = 'default.png'
+        foto_nome = DEFAULT_AVATAR
 
-        if 'foto' in request.files:
-            file = request.files['foto']
-            if file and allowed_file(file.filename):
-                ext = file.filename.rsplit('.', 1)[1]
+        if "foto" in request.files:
+            file = request.files["foto"]
+            if file and file.filename:
+                if not allowed_file(file.filename):
+                    flash("Formato invalido. Use png, jpg, jpeg ou gif.")
+                    return redirect(url_for("auth.register"))
+
+                ext = file.filename.rsplit(".", 1)[1].lower()
                 filename = f"{uuid.uuid4()}.{ext}"
-                caminho = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                caminho = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
                 file.save(caminho)
                 foto_nome = filename
 
-        user = User(nome=nome, email=email, senha=senha, foto=foto_nome)
+        user = User(
+            nome=nome,
+            email=email,
+            senha=senha,
+            foto=foto_nome,
+            foto_pos_x=foto_pos_x,
+            foto_pos_y=foto_pos_y,
+        )
         db.session.add(user)
         db.session.commit()
 
-        return redirect(url_for('auth.login'))
+        flash("Cadastro realizado com sucesso. Entre para continuar.")
+        return redirect(url_for("auth.login"))
 
-    return render_template('login.html')
+    return render_template("register.html")
 
 
-# 🔹 LOGIN
-@auth.route('/login', methods=['GET', 'POST'])
+@auth.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == 'POST':
-        email = request.form['email']
-        senha = request.form['senha']
+    if current_user.is_authenticated:
+        return redirect(url_for("movie.index"))
+
+    if request.method == "POST":
+        email = request.form["email"]
+        senha = request.form["senha"]
 
         user = User.query.filter_by(email=email).first()
 
         if user and check_password_hash(user.senha, senha):
             login_user(user)
-            return redirect(url_for('main.dashboard'))
-        else:
-            flash('Login inválido')
+            return redirect(url_for("movie.index"))
 
-    return render_template('login.html')
+        flash("Login invalido")
+
+    return render_template("login.html")
 
 
-# 🔹 LOGOUT
-@auth.route('/logout')
+@auth.route("/logout")
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('auth.login'))
+    return redirect(url_for("auth.login"))

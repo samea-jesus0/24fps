@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>24FPS | Cadastro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styleLogin.css') }}">
+</head>
+
+<body class="auth-page">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div id="toast" class="toast">
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <main class="auth-shell">
+        <header class="auth-topbar">
+            <a class="auth-brand" href="{{ url_for('auth.login') }}">24FPS</a>
+
+            <nav class="auth-nav">
+                <a class="auth-tab" href="{{ url_for('auth.login') }}">login</a>
+                <a class="auth-tab is-active" href="{{ url_for('auth.register') }}">cadastro</a>
+            </nav>
+        </header>
+
+        <section class="auth-grid">
+            <article class="story-card story-card--register">
+                <span class="eyebrow">new account</span>
+                <h1>Crie sua cabine pessoal e comece a montar seu mapa de filmes.</h1>
+                <p>
+                    O cadastro separa login e criacao de conta para deixar o fluxo mais claro, leve e com cara de
+                    produto de cinema, nao de sistema genrico.
+                </p>
+
+                <div class="story-badges">
+                    <span>visual caloroso</span>
+                    <span>acesso rapido</span>
+                    <span>perfil personalizavel</span>
+                </div>
+
+                <div class="story-visual">
+                    <div class="ticket-card">
+                        <small>collect your taste</small>
+                        <strong>Join 24FPS</strong>
+                        <span>build your movie corner</span>
+                    </div>
+
+                    <ul class="story-list">
+                        <li>Adicione seu nome e email</li>
+                        <li>Escolha uma senha simples de lembrar</li>
+                        <li>Opcionalmente, suba uma foto de perfil</li>
+                    </ul>
+                </div>
+            </article>
+
+            <article class="auth-card">
+                <span class="card-kicker">start here</span>
+                <h2>Cadastro</h2>
+                <p>Preencha os campos e crie sua conta para entrar na experiencia.</p>
+
+                <form class="auth-form" action="{{ url_for('auth.register') }}" method="POST" enctype="multipart/form-data">
+                    <label for="register-name">Nome</label>
+                    <input id="register-name" type="text" name="nome" placeholder="Seu nome" required>
+
+                    <label for="register-email">Email</label>
+                    <input id="register-email" type="email" name="email" placeholder="voce@email.com" required>
+
+                    <label for="register-password">Senha</label>
+                    <input id="register-password" type="password" name="senha" placeholder="Crie uma senha" required>
+
+                    <section class="avatar-editor" data-avatar-editor>
+                        <div class="avatar-preview-panel">
+                            <div class="avatar-preview-shell">
+                                <img
+                                    class="avatar-preview-image"
+                                    data-avatar-preview
+                                    src="{{ url_for('static', filename='uploads/default-avatar.svg') }}"
+                                    alt="Preview da foto de perfil"
+                                    style="--avatar-pos-x: 50%; --avatar-pos-y: 50%;">
+                            </div>
+                            <p class="avatar-preview-caption">Preview circular do seu perfil</p>
+                        </div>
+
+                        <div class="avatar-editor-fields">
+                            <label for="register-photo">Foto de perfil</label>
+                            <input
+                                id="register-photo"
+                                type="file"
+                                name="foto"
+                                accept=".png,.jpg,.jpeg,.gif,image/png,image/jpeg,image/gif"
+                                data-avatar-input>
+
+                            <p class="field-help">Extensoes aceitas: PNG, JPG, JPEG e GIF. Tamanho maximo: 2 MB.</p>
+                            <p class="field-error" data-file-error hidden></p>
+
+                            <div class="avatar-controls">
+                                <div class="range-group">
+                                    <div class="range-label-row">
+                                        <label for="register-photo-pos-x">Posicao horizontal</label>
+                                        <span data-avatar-pos-x-value>50%</span>
+                                    </div>
+                                    <input
+                                        id="register-photo-pos-x"
+                                        type="range"
+                                        min="0"
+                                        max="100"
+                                        value="50"
+                                        name="foto_pos_x"
+                                        data-avatar-pos-x>
+                                </div>
+
+                                <div class="range-group">
+                                    <div class="range-label-row">
+                                        <label for="register-photo-pos-y">Posicao vertical</label>
+                                        <span data-avatar-pos-y-value>50%</span>
+                                    </div>
+                                    <input
+                                        id="register-photo-pos-y"
+                                        type="range"
+                                        min="0"
+                                        max="100"
+                                        value="50"
+                                        name="foto_pos_y"
+                                        data-avatar-pos-y>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <button type="submit">Criar conta</button>
+                </form>
+
+                <div class="auth-footer">
+                    <p>Ja tem conta?</p>
+                    <a class="text-link" href="{{ url_for('auth.login') }}">Fazer login</a>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+
+</html>

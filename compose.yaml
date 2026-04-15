@@ -1,15 +1,39 @@
 services:
   web:
     build: .
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
     ports:
       - "5000:5000"
+    volumes:
+      - uploads_data:/app/static/uploads
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
   db:
     image: mysql:8.0
+    env_file:
+      - .env
     environment:
-      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
-      - MYSQL_DATABASE="filmes_24fps"
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME:-filmes_24fps}
     ports:
       - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p$${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+  uploads_data:

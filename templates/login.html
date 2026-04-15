@@ -1,70 +1,93 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>24FPS | Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styleLogin.css') }}">
-    <title>PERFIL</title>
 </head>
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
+
+<body class="auth-page">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
     <div id="toast" class="toast">
-      {% for message in messages %}
+        {% for message in messages %}
         <p>{{ message }}</p>
-      {% endfor %}
+        {% endfor %}
     </div>
+    {% endif %}
+    {% endwith %}
 
-    <script>
-      const toast = document.getElementById("toast");
+    <main class="auth-shell">
+        <header class="auth-topbar">
+            <a class="auth-brand" href="{{ url_for('auth.login') }}">24FPS</a>
 
-      setTimeout(() => {
-        toast.classList.add("show");
-      }, 100);
+            <nav class="auth-nav">
+                <a class="auth-tab is-active" href="{{ url_for('auth.login') }}">login</a>
+                <a class="auth-tab" href="{{ url_for('auth.register') }}">cadastro</a>
+            </nav>
+        </header>
 
-      setTimeout(() => {
-        toast.classList.remove("show");
-      }, 3000);
-    </script>
-  {% endif %}
-{% endwith %}
-<body>
-  <nav class="nav-bar">
-    <p class="marca">24FPS</p>
-    <ul>
-      <li><a href="/">Home</a></li>
-      <li><a href="/about">Sobre</a></li>
-      <li><a href="/contact">Contato</a></li>
-    </ul>
-  </nav>
+        <section class="auth-grid">
+            <article class="story-card story-card--login">
+                <span class="eyebrow">cine journal</span>
+                <h1>Entre e volte para a sua pagina de filmes.</h1>
+                <p>
+                    24FPS foi pensado como um canto visual para pesquisar filmes, acompanhar posters e deixar a
+                    experiencia mais proxima de um diario cinefilo do que de um formulario comum.
+                </p>
 
-  <div class="container">
+                <div class="story-badges">
+                    <span>pesquisa rapida</span>
+                    <span>perfil com foto</span>
+                    <span>vibe editorial</span>
+                </div>
 
-    <!-- LOGIN -->
-    <div class="card">
-      <h2>Login</h2>
-      <form action="{{ url_for('auth.login') }}" method="POST">
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="senha" placeholder="Senha" required>
-        <button type="submit" onclick="r">Entrar</button>
-      </form>
-    </div>
+                <div class="story-visual">
+                    <div class="ticket-card">
+                        <small>now screening</small>
+                        <strong>24FPS Diary</strong>
+                        <span>search, save, repeat</span>
+                    </div>
 
-    <!-- CADASTRO -->
-    <div class="card">
-      <h2>Cadastro</h2>
-      <form action="{{ url_for('auth.register') }}" method="POST" enctype="multipart/form-data">
-        <input type="text" name="nome" placeholder="Nome" required>
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="senha" placeholder="Senha" required>
+                    <ul class="story-list">
+                        <li>Procure um filme em segundos</li>
+                        <li>Volte para sua cabine pessoal</li>
+                        <li>Entre no clima antes do play</li>
+                    </ul>
+                </div>
+            </article>
 
-        <label>Foto de perfil:</label>
-        <input type="file" name="foto">
+            <article class="auth-card">
+                <span class="card-kicker">welcome back</span>
+                <h2>Login</h2>
+                <p>Use seu email e senha para abrir a pagina principal.</p>
 
-        <button type="submit">Cadastrar</button>
-      </form>
-    </div>
+                <form class="auth-form" action="{{ url_for('auth.login') }}" method="POST">
+                    <label for="login-email">Email</label>
+                    <input id="login-email" type="email" name="email" placeholder="voce@email.com" required>
 
-  </div>
-  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+                    <label for="login-password">Senha</label>
+                    <input id="login-password" type="password" name="senha" placeholder="Sua senha" required>
+
+                    <button type="submit">Entrar</button>
+                </form>
+
+                <div class="auth-footer">
+                    <p>Ainda nao tem conta?</p>
+                    <a class="text-link" href="{{ url_for('auth.register') }}">Criar cadastro</a>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
+
 </html>

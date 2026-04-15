@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-labelledby="title desc">
+  <title id="title">Avatar padrao</title>
+  <desc id="desc">Ilustracao simples para foto de perfil padrao.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff4c7"/>
+      <stop offset="100%" stop-color="#f0cf72"/>
+    </linearGradient>
+  </defs>
+  <rect width="240" height="240" rx="120" fill="url(#bg)"/>
+  <circle cx="120" cy="92" r="42" fill="#8ba54d"/>
+  <path d="M45 205c10-42 43-69 75-69s65 27 75 69" fill="#c96d5f"/>
+  <circle cx="120" cy="120" r="102" fill="none" stroke="#fff8ec" stroke-width="10" stroke-dasharray="3 15"/>
+</svg>

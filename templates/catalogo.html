@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>24FPS | Catalogo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styleCatalogo.css') }}">
+</head>
+
+<body class="catalog-page">
+    {% set current_avatar = user.foto if user.foto and user.foto != 'default.png' else 'default-avatar.svg' %}
+    <div class="page-noise" aria-hidden="true"></div>
+
+    <main class="catalog-shell">
+        <header class="catalog-topbar">
+            <div class="catalog-dots" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <div class="catalog-address">https://24fps.cinema/catalogo</div>
+
+            <div class="catalog-utility">
+                <a class="utility-pill" href="{{ url_for('perfil.perfil') }}">perfil</a>
+                <a class="utility-pill utility-pill--avatar" href="{{ url_for('perfil.perfil') }}">
+                    <img
+                        src="{{ url_for('static', filename='uploads/' + current_avatar) }}?{{ range(1,1000)|random }}"
+                        alt="Foto de perfil"
+                        style="object-position: {{ user.foto_pos_x or 50 }}% {{ user.foto_pos_y or 50 }}%;">
+                    <span>minha conta</span>
+                </a>
+            </div>
+        </header>
+
+        <div class="catalog-toolbar">
+            <a class="toolbar-tab" href="{{ url_for('movie.index') }}">descobrir</a>
+            <a class="toolbar-tab is-active" href="{{ url_for('catalogo.catalogo') }}">catalogo</a>
+            <a class="toolbar-tab" href="{{ url_for('perfil.perfil') }}">perfil</a>
+            <span class="toolbar-note">dados carregados via OMDb API</span>
+        </div>
+
+        <section class="catalog-hero">
+            <article class="hero-copy reveal">
+                <span class="eyebrow">movie library</span>
+                <h1>Um catalogo organizado por generos, com filmes puxados da API e espaco para explorar cada clima.</h1>
+                <p>
+                    Agora as secoes do 24FPS foram pensadas por genero, para ficar mais natural navegar entre acao,
+                    drama, comedia, romance, animacao e ficcao cientifica enquanto voce refina por ano, pais, duracao,
+                    classificacao e idioma.
+                </p>
+
+                <div class="hero-links">
+                    <a class="hero-link hero-link--primary" href="#catalogFilters">explorar filtros</a>
+                    <a class="hero-link" href="{{ url_for('movie.index') }}">voltar para descobrir</a>
+                </div>
+            </article>
+
+            <aside class="hero-stats reveal reveal-delay-1">
+                <span class="eyebrow">snapshot</span>
+
+                <div class="stat-card">
+                    <strong data-stat-visible-movies>0</strong>
+                    <span>filmes visiveis</span>
+                </div>
+
+                <div class="stat-card">
+                    <strong data-stat-sections>0</strong>
+                    <span>generos em destaque</span>
+                </div>
+
+                <div class="stat-card">
+                    <strong data-stat-available>0</strong>
+                    <span>titulos carregados da API</span>
+                </div>
+            </aside>
+        </section>
+
+        <section id="catalogFilters" class="filter-board reveal reveal-delay-2">
+            <div class="filter-copy">
+                <span class="eyebrow">filters</span>
+                <h2>Afine a busca dentro dos generos e encontre a sessao certa mais rapido.</h2>
+                <p>Os filtros atuam sobre as prateleiras por genero e os filmes continuam vindo da OMDb API.</p>
+            </div>
+
+            <form id="catalogForm" class="filter-form">
+                <div class="filter-grid">
+                    <label class="field">
+                        <span>Buscar</span>
+                        <input type="search" name="search" placeholder="Titulo, diretor, elenco ou clima">
+                    </label>
+
+                    <label class="field">
+                        <span>Genero em destaque</span>
+                        <select name="category" data-dynamic-options="categories"></select>
+                    </label>
+
+                    <label class="field">
+                        <span>Ano minimo</span>
+                        <input type="number" name="year_min" min="1900" max="2100" placeholder="Ex.: 1990">
+                    </label>
+
+                    <label class="field">
+                        <span>Ano maximo</span>
+                        <input type="number" name="year_max" min="1900" max="2100" placeholder="Ex.: 2025">
+                    </label>
+
+                    <label class="field">
+                        <span>Pais</span>
+                        <select name="country" data-dynamic-options="countries"></select>
+                    </label>
+
+                    <label class="field">
+                        <span>Duracao</span>
+                        <select name="duration" data-dynamic-options="duration_buckets"></select>
+                    </label>
+
+                    <label class="field">
+                        <span>Classificacao</span>
+                        <select name="classification" data-dynamic-options="classifications"></select>
+                    </label>
+
+                    <label class="field">
+                        <span>Idioma</span>
+                        <select name="language" data-dynamic-options="languages"></select>
+                    </label>
+
+                    <label class="field">
+                        <span>Ordenar</span>
+                        <select name="sort" data-dynamic-options="sort_options"></select>
+                    </label>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="action-btn action-btn--primary">aplicar filtros</button>
+                    <button type="button" id="clearFiltersBtn" class="action-btn">limpar</button>
+                </div>
+
+                <p class="filter-hint">Os filtros atualizam o catalogo automaticamente conforme voce muda os campos.</p>
+            </form>
+        </section>
+
+        <section class="catalog-feedback reveal reveal-delay-3">
+            <div class="feedback-copy">
+                <span class="eyebrow">genres</span>
+                <h2 data-feedback-title>Carregando o catalogo...</h2>
+                <p data-feedback-text>Estamos montando as secoes por genero e buscando os detalhes dos filmes na API.</p>
+            </div>
+            <div class="active-filters" data-active-filters></div>
+        </section>
+
+        <section id="catalogSections" class="catalog-sections reveal reveal-delay-4">
+            <div class="loading-state">
+                <span class="loading-badge">carregando catalogo</span>
+                <div class="loading-grid">
+                    <div class="loading-card"></div>
+                    <div class="loading-card"></div>
+                    <div class="loading-card"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/catalogo.js') }}"></script>
+</body>
+
+</html>

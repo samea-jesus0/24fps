@@ -1,44 +1,59 @@
-from flask import Blueprint, render_template, redirect, url_for, request, current_app
+from flask import Blueprint, render_template, redirect, url_for, request, current_app, flash
 from flask_login import login_required, current_user
-from werkzeug.utils import secure_filename
 from extensions import db
 import os
 import uuid
 
-main = Blueprint('main', __name__)
+main = Blueprint("main", __name__)
+DEFAULT_AVATAR = "default-avatar.svg"
+
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in current_app.config['ALLOWED_EXTENSIONS']
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in current_app.config["ALLOWED_EXTENSIONS"]
 
 
-@main.route('/dashboard', methods=['GET', 'POST'])
+def normalize_photo_position(value):
+    try:
+        return max(0, min(100, int(float(value))))
+    except (TypeError, ValueError):
+        return 50
+
+
+@main.route("/dashboard", methods=["GET", "POST"])
 @login_required
 def dashboard():
-    if request.method == 'POST':
+    if request.method == "POST":
+        file = request.files.get("foto")
+        foto_pos_x = normalize_photo_position(request.form.get("foto_pos_x", current_user.foto_pos_x or 50))
+        foto_pos_y = normalize_photo_position(request.form.get("foto_pos_y", current_user.foto_pos_y or 50))
+        updated_photo = False
 
-        if 'foto' in request.files:
-            file = request.files['foto']
+        if file and file.filename:
+            if not allowed_file(file.filename):
+                flash("Formato invalido. Use png, jpg, jpeg ou gif.")
+                return redirect(url_for("main.dashboard"))
 
-            if file and allowed_file(file.filename):
+            if current_user.foto and current_user.foto not in {"default.png", DEFAULT_AVATAR}:
+                old_path = os.path.join(current_app.config["UPLOAD_FOLDER"], current_user.foto)
+                if os.path.exists(old_path):
+                    os.remove(old_path)
 
-                # 🔥 Remove foto antiga
-                if current_user.foto and current_user.foto != 'default.png':
-                    old_path = os.path.join(current_app.config['UPLOAD_FOLDER'], current_user.foto)
-                    if os.path.exists(old_path):
-                        os.remove(old_path)
+            ext = file.filename.rsplit(".", 1)[1].lower()
+            filename = f"{uuid.uuid4()}.{ext}"
+            caminho = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
+            file.save(caminho)
 
-                # 🔥 Gera nome único
-                ext = file.filename.rsplit('.', 1)[1].lower()
-                filename = f"{uuid.uuid4()}.{ext}"
+            current_user.foto = filename
+            updated_photo = True
 
-                # 🔥 Salva arquivo
-                caminho = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-                file.save(caminho)
+        current_user.foto_pos_x = foto_pos_x
+        current_user.foto_pos_y = foto_pos_y
+        db.session.commit()
 
-                # 🔥 ATUALIZA no banco (ESSA É A CHAVE)
-                current_user.foto = filename
-                db.session.commit()
+        if updated_photo:
+            flash("Foto e enquadramento atualizados com sucesso.")
+        else:
+            flash("Enquadramento atualizado com sucesso.")
+        return redirect(url_for("main.dashboard"))
 
-        return redirect(url_for('main.dashboard'))
-
-    return render_template('perfil.html', user=current_user)
+    return render_template("perfil.html", user=current_user)

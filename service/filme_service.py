@@ -542,3 +542,32 @@ def obter_catalogo_filmes(raw_filters=None):
         "applied_filters": filters,
         "section_pages": section_pages,
     }
+
+
+def buscar_sugestoes_filmes(query):
+    """Busca sugestões de filmes na API do OMDb baseado em uma query."""
+    api_key = current_app.config.get("OMDB_API_KEY")
+    if not api_key:
+        raise RuntimeError("OMDB_API_KEY não configurada.")
+
+    url = f"http://www.omdbapi.com/?s={query}&apikey={api_key}&type=movie"
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+
+        if data.get("Response") == "True":
+            suggestions = []
+            for movie in data.get("Search", [])[:10]:  # Limita a 10 sugestões
+                suggestions.append({
+                    "titulo": movie.get("Title"),
+                    "ano": movie.get("Year"),
+                    "imdb_id": movie.get("imdbID"),
+                    "poster": movie.get("Poster") if movie.get("Poster") != "N/A" else None
+                })
+            return suggestions
+        else:
+            return []
+    except requests.RequestException:
+        current_app.logger.exception("Falha ao buscar sugestões de filmes na OMDb.")
+        return []

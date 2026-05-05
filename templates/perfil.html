@@ -175,6 +175,11 @@
                         {% for review in reviews %}
                             <article class="review-slide {% if loop.first %}is-active{% endif %}" data-review-id="{{ review.id }}">
                                 <div class="review-slide-copy">
+                                    {% if review.poster_url %}
+                                    <div class="review-poster">
+                                        <img src="{{ review.poster_url }}" alt="Poster de {{ review.filme_titulo }}" loading="lazy">
+                                    </div>
+                                    {% endif %}
                                     <div class="review-slide-top">
                                         <span class="review-film">{{ review.filme_titulo }}</span>
                                         <span class="review-rating">{{ review.nota or 0 }}/5</span>
@@ -217,7 +222,7 @@
                         <input type="hidden" name="review_id" id="reviewIdInput">
 
                         <label for="filmeTitulo">Título do filme</label>
-                        <input id="filmeTitulo" name="filme_titulo" type="text" maxlength="255" required>
+                        <input id="filmeTitulo" name="filme_titulo" type="text" maxlength="255" autocomplete="off" placeholder="Digite para buscar na OMDb" required>
 
                         <label for="reviewRating">Nota</label>
                         <input id="reviewRating" name="nota" type="number" min="0" max="5" step="1" value="0">

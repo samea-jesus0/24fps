@@ -28,3 +28,18 @@ def buscar():
     return jsonify(filme)
 
 
+@movie_bp.route("/sugestoes", methods=["GET"])
+def sugestoes():
+    query = request.args.get("q", "").strip()
+
+    if not query or len(query) < 2:
+        return jsonify([])
+
+    try:
+        from service.filme_service import buscar_sugestoes_filmes
+        sugestoes = buscar_sugestoes_filmes(query)
+        return jsonify(sugestoes[:10])  # Limita a 10 sugestões
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+

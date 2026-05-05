@@ -301,21 +301,25 @@ function formatReviewDate(dateString) {
 }
 
 function createReviewSlideMarkup(review) {
-    return `
-        <article class="review-slide is-active" data-review-id="${escapeHtml(review.id)}">
-            <div class="review-slide-copy">
-                <div class="review-slide-top">
-                    <span class="review-film">${escapeHtml(review.filme_titulo)}</span>
-                    <span class="review-rating">${escapeHtml(review.nota || 0)}/5</span>
-                </div>
-                <p class="review-slide-text">${escapeHtml(review.conteudo).replace(/\n/g, "<br>")}</p>
-                <div class="review-slide-footer">
-                    <span class="review-date">Atualizado em ${formatReviewDate(review.updated_at || review.created_at)}</span>
-                    <button class="review-edit-button" type="button" data-review-id="${escapeHtml(review.id)}">Editar</button>
-                </div>
-            </div>
-        </article>
-    `;
+    let posterHtml = '';
+    if (review.poster_url) {
+        posterHtml = '<div class="review-poster"><img src="' + escapeHtml(review.poster_url) + '" alt="Poster" loading="lazy"></div>';
+    }
+
+    return '<article class="review-slide is-active" data-review-id="' + escapeHtml(review.id) + '">' +
+           '<div class="review-slide-copy">' +
+           posterHtml +
+           '<div class="review-slide-top">' +
+           '<span class="review-film">' + escapeHtml(review.filme_titulo) + '</span>' +
+           '<span class="review-rating">' + escapeHtml(review.nota || 0) + '/5</span>' +
+           '</div>' +
+           '<p class="review-slide-text">' + escapeHtml(review.conteudo || '').replace(/\n/g, "<br>") + '</p>' +
+           '<div class="review-slide-footer">' +
+           '<span class="review-date">Atualizado em hoje</span>' +
+           '<button class="review-edit-button" type="button" data-review-id="' + escapeHtml(review.id) + '">Editar</button>' +
+           '</div>' +
+           '</div>' +
+           '</article>';
 }
 
 function getReviewSlides() {
@@ -362,12 +366,23 @@ function showReviewModal(mode = "create", review = null) {
     title.textContent = mode === "edit" ? "Editar resenha" : "Nova resenha";
     reviewIdInput.value = review?.id || "";
     filmeTitulo.value = review?.filme_titulo || "";
+    filmeTitulo.setAttribute('data-filme-id', review?.filme_id || "");
+    filmeTitulo.setAttribute('data-poster-url', review?.poster_url || "");
     reviewRating.value = review?.nota || 0;
     reviewContent.value = review?.conteudo || "";
     deleteButton.hidden = mode !== "edit";
     errorElement.hidden = true;
     errorElement.textContent = "";
     document.body.style.overflow = "hidden";
+
+    // Inicializar autocomplete se ainda não foi inicializado
+    if (!filmeTitulo.hasAttribute('data-autocomplete-init')) {
+        // Adiar a inicialização para garantir que o modal esteja totalmente renderizado
+        setTimeout(() => {
+            initMovieAutocomplete(filmeTitulo);
+            filmeTitulo.setAttribute('data-autocomplete-init', 'true');
+        }, 100);
+    }
 }
 
 function hideReviewModal() {
@@ -464,6 +479,8 @@ async function submitReviewForm(event) {
 
     const reviewId = document.getElementById("reviewIdInput").value;
     const filmeTitulo = document.getElementById("filmeTitulo").value.trim();
+    const filmeId = document.getElementById("filmeTitulo").getAttribute('data-filme-id') || "";
+    const posterUrl = document.getElementById("filmeTitulo").getAttribute('data-poster-url') || "";
     const reviewRating = document.getElementById("reviewRating").value;
     const reviewContent = document.getElementById("reviewContent").value.trim();
 
@@ -474,6 +491,8 @@ async function submitReviewForm(event) {
 
     const payload = {
         filme_titulo: filmeTitulo,
+        filme_id: filmeId,
+        poster_url: posterUrl,
         conteudo: reviewContent,
         nota: Number(reviewRating || 0),
     };
@@ -518,12 +537,16 @@ function openEditReview(reviewId) {
     const filmeTitulo = slide.querySelector(".review-film")?.textContent || "";
     const nota = slide.querySelector(".review-rating")?.textContent?.split("/")[0]?.trim() || "0";
     const conteudo = slide.querySelector(".review-slide-text")?.textContent || "";
+    const posterImg = slide.querySelector(".review-poster img");
+    const posterUrl = posterImg ? posterImg.src : "";
 
     showReviewModal("edit", {
         id: reviewId,
         filme_titulo: filmeTitulo,
         nota: Number(nota),
         conteudo,
+        filme_id: "",
+        poster_url: posterUrl,
     });
 }
 
@@ -584,6 +607,187 @@ function initializeReviewCarousel() {
         slides[0].classList.add("is-active");
     }
     updateCarouselButtons();
+}
+
+// Funções para autocomplete de filmes no modal de review
+let movieSuggestionsTimeout = null;
+let selectedSuggestionIndex = -1;
+
+async function buscarSugestoesFilmes(query) {
+    if (!query || query.length < 2) {
+        return [];
+    }
+
+    try {
+        const response = await fetch(`/sugestoes?q=${encodeURIComponent(query)}`);
+        if (!response.ok) {
+            return [];
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Erro ao buscar sugestões:", error);
+        return [];
+    }
+}
+
+function mostrarSugestoes(sugestoes, inputElement) {
+    // Remover sugestões existentes
+    const existingDropdown = document.querySelector('.movie-suggestions-dropdown');
+    if (existingDropdown) {
+        existingDropdown.remove();
+    }
+
+    if (!sugestoes || sugestoes.length === 0) {
+        selectedSuggestionIndex = -1;
+        return;
+    }
+
+    // Criar dropdown de sugestões
+    const dropdown = document.createElement('div');
+    dropdown.className = 'movie-suggestions-dropdown';
+    dropdown.style.cssText = 'position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-top: none; border-radius: 0 0 4px 4px; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1);';
+
+    sugestoes.forEach((sugestao, index) => {
+        const item = document.createElement('div');
+        item.className = 'movie-suggestion-item';
+        item.style.cssText = 'padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #eee; display: flex; align-items: center;';
+
+        const imgHtml = sugestao.poster ? '<img src="' + escapeHtml(sugestao.poster) + '" alt="Poster" style="width: 30px; height: 45px; object-fit: cover; margin-right: 8px;">' : '';
+        item.innerHTML = imgHtml + '<div><div style="font-weight: bold;">' + escapeHtml(sugestao.titulo) + '</div><div style="font-size: 0.8em; color: #666;">' + escapeHtml(sugestao.ano || '') + '</div></div>';
+
+        item.addEventListener('click', () => {
+            inputElement.value = sugestao.titulo;
+            inputElement.setAttribute('data-filme-id', sugestao.imdb_id);
+            inputElement.setAttribute('data-poster-url', sugestao.poster || '');
+            dropdown.remove();
+            selectedSuggestionIndex = -1;
+        });
+
+        item.addEventListener('mouseenter', () => {
+            selectedSuggestionIndex = index;
+            atualizarSelecaoSugestoes(dropdown, index);
+        });
+
+        dropdown.appendChild(item);
+    });
+
+    // Posicionar dropdown
+    const inputRect = inputElement.getBoundingClientRect();
+    const modal = inputElement.closest('.review-modal-card');
+    if (modal) {
+        const modalRect = modal.getBoundingClientRect();
+        dropdown.style.left = (inputRect.left - modalRect.left) + 'px';
+        dropdown.style.top = (inputRect.bottom - modalRect.top) + 'px';
+        dropdown.style.width = inputRect.width + 'px';
+        modal.appendChild(dropdown);
+    }
+
+    selectedSuggestionIndex = -1;
+}
+
+function selecionarSugestaoAtual(inputElement) {
+    const dropdown = document.querySelector('.movie-suggestions-dropdown');
+    if (!dropdown || selectedSuggestionIndex < 0) {
+        return;
+    }
+
+    const items = dropdown.querySelectorAll('.movie-suggestion-item');
+    const selectedItem = items[selectedSuggestionIndex];
+    if (selectedItem) {
+        selectedItem.click();
+        inputElement.focus();
+    }
+}
+
+function navegarSugestoes(inputElement, direction) {
+    const dropdown = document.querySelector('.movie-suggestions-dropdown');
+    if (!dropdown) return;
+
+    const items = dropdown.querySelectorAll('.movie-suggestion-item');
+    if (items.length === 0) return;
+
+    selectedSuggestionIndex += direction;
+    if (selectedSuggestionIndex < 0) selectedSuggestionIndex = items.length - 1;
+    if (selectedSuggestionIndex >= items.length) selectedSuggestionIndex = 0;
+
+    atualizarSelecaoSugestoes(dropdown, selectedSuggestionIndex);
+}
+
+function atualizarSelecaoSugestoes(dropdown, index) {
+    const items = dropdown.querySelectorAll('.movie-suggestion-item');
+    items.forEach((item, i) => {
+        item.style.backgroundColor = i === index ? '#f0f0f0' : 'white';
+    });
+}
+
+function initMovieAutocomplete(inputElement) {
+    let currentQuery = '';
+
+    inputElement.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        currentQuery = query;
+
+        // Limpar timeout anterior
+        if (movieSuggestionsTimeout) {
+            clearTimeout(movieSuggestionsTimeout);
+        }
+
+        // Remover dropdown se query for muito curta
+        if (query.length < 2) {
+            const existingDropdown = document.querySelector('.movie-suggestions-dropdown');
+            if (existingDropdown) {
+                existingDropdown.remove();
+            }
+            selectedSuggestionIndex = -1;
+            return;
+        }
+
+        // Buscar sugestões com debounce
+        movieSuggestionsTimeout = setTimeout(async () => {
+            if (currentQuery === query) { // Verificar se ainda é a query atual
+                const sugestoes = await buscarSugestoesFilmes(query);
+                mostrarSugestoes(sugestoes, inputElement);
+            }
+        }, 300);
+    });
+
+    inputElement.addEventListener('keydown', (e) => {
+        const dropdown = document.querySelector('.movie-suggestions-dropdown');
+
+        if (!dropdown) return;
+
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                navegarSugestoes(inputElement, 1);
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                navegarSugestoes(inputElement, -1);
+                break;
+            case 'Enter':
+                e.preventDefault();
+                selecionarSugestaoAtual(inputElement);
+                break;
+            case 'Escape':
+                dropdown.remove();
+                selectedSuggestionIndex = -1;
+                inputElement.blur();
+                break;
+        }
+    });
+
+    // Fechar dropdown ao clicar fora
+    document.addEventListener('click', (e) => {
+        if (!inputElement.contains(e.target)) {
+            const dropdown = document.querySelector('.movie-suggestions-dropdown');
+            if (dropdown) {
+                dropdown.remove();
+                selectedSuggestionIndex = -1;
+            }
+        }
+    });
 }
 
 document.addEventListener("DOMContentLoaded", () => {

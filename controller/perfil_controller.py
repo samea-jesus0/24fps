@@ -15,6 +15,7 @@ def _review_payload(review):
         "id": review.id,
         "filme_id": review.filme_id,
         "filme_titulo": review.filme_titulo,
+        "poster_url": review.poster_url,
         "conteudo": review.conteudo,
         "nota": review.nota,
         "created_at": review.created_at.isoformat() if review.created_at else None,
@@ -40,6 +41,7 @@ def create_review():
     filme_titulo = (data.get("filme_titulo") or "").strip()
     conteudo = (data.get("conteudo") or "").strip()
     filme_id = (data.get("filme_id") or "").strip() or None
+    poster_url = (data.get("poster_url") or "").strip() or None
 
     try:
         nota = int(data.get("nota", 0))
@@ -52,10 +54,23 @@ def create_review():
     if nota < 0 or nota > 5:
         return jsonify({"erro": "A nota deve ser entre 0 e 5."}), 400
 
+    # Se não temos poster_url, tentar buscar do OMDB
+    if not poster_url:
+        try:
+            if filme_id:
+                filme_data = buscar_filme_por_nome(filme_id)  # buscar por ID
+            else:
+                filme_data = buscar_filme_por_nome(filme_titulo)
+            if filme_data and filme_data.get("poster"):
+                poster_url = filme_data["poster"]
+        except Exception:
+            pass  # Ignorar erros na busca do poster
+
     review = Review(
         user_id=current_user.id,
         filme_id=filme_id,
         filme_titulo=filme_titulo,
+        poster_url=poster_url,
         conteudo=conteudo,
         nota=nota,
         created_at=datetime.utcnow(),
@@ -77,6 +92,8 @@ def update_review(review_id):
     data = request.get_json(silent=True) or {}
     filme_titulo = (data.get("filme_titulo") or "").strip()
     conteudo = (data.get("conteudo") or "").strip()
+    filme_id = (data.get("filme_id") or "").strip() or None
+    poster_url = (data.get("poster_url") or "").strip() or None
 
     try:
         nota = int(data.get("nota", 0))
@@ -89,7 +106,21 @@ def update_review(review_id):
     if nota < 0 or nota > 5:
         return jsonify({"erro": "A nota deve ser entre 0 e 5."}), 400
 
+    # Se não temos poster_url, tentar buscar do OMDB
+    if not poster_url:
+        try:
+            if filme_id:
+                filme_data = buscar_filme_por_nome(filme_id)  # buscar por ID
+            else:
+                filme_data = buscar_filme_por_nome(filme_titulo)
+            if filme_data and filme_data.get("poster"):
+                poster_url = filme_data["poster"]
+        except Exception:
+            pass  # Ignorar erros na busca do poster
+
+    review.filme_id = filme_id
     review.filme_titulo = filme_titulo
+    review.poster_url = poster_url
     review.conteudo = conteudo
     review.nota = nota
     review.updated_at = datetime.utcnow()

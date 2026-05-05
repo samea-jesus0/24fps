@@ -542,6 +542,20 @@ p {
     gap: 18px;
 }
 
+.review-poster {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.review-poster img {
+    max-width: 120px;
+    max-height: 180px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    object-fit: cover;
+}
+
 .review-slide-top {
     display: flex;
     align-items: center;
@@ -867,6 +881,57 @@ p {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Estilos para o dropdown de sugestões de filmes */
+.movie-suggestions-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.movie-suggestion-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s ease;
+}
+
+.movie-suggestion-item:hover,
+.movie-suggestion-item.selected {
+    background-color: #f0f0f0;
+}
+
+.movie-suggestion-item img {
+    width: 30px;
+    height: 45px;
+    object-fit: cover;
+    margin-right: 8px;
+    border-radius: 2px;
+}
+
+.movie-suggestion-item div {
+    flex: 1;
+}
+
+.movie-suggestion-item .movie-title {
+    font-weight: bold;
+}
+
+.movie-suggestion-item .movie-year {
+    font-size: 0.8em;
+    color: #666;
 }
 
 @media (max-width: 980px) {

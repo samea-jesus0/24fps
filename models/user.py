@@ -11,3 +11,10 @@ class User(db.Model, UserMixin):
     foto = db.Column(db.String(200), default="default-avatar.svg")
     foto_pos_x = db.Column(db.Integer, default=50, nullable=False)
     foto_pos_y = db.Column(db.Integer, default=50, nullable=False)
+
+    reviews = db.relationship(
+        "Review",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="dynamic",
+    )

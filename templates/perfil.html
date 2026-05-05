@@ -158,6 +158,83 @@
                 </form>
             </article>
         </section>
+
+        <section class="profile-reviews reveal reveal-delay-4">
+            <div class="review-header">
+                <div>
+                    <span class="eyebrow">Resenhas</span>
+                    <h2>Seus reviews de filmes</h2>
+                    <p>Crie, edite ou remova suas resenhas aqui. Cada filme ganha um slide dentro do seu perfil.</p>
+                </div>
+                <button class="hero-link hero-link--primary" type="button" id="openReviewModalButton">Nova resenha</button>
+            </div>
+
+            <div class="review-shell">
+                <div class="review-carousel" id="reviewCarousel">
+                    {% if reviews %}
+                        {% for review in reviews %}
+                            <article class="review-slide {% if loop.first %}is-active{% endif %}" data-review-id="{{ review.id }}">
+                                <div class="review-slide-copy">
+                                    <div class="review-slide-top">
+                                        <span class="review-film">{{ review.filme_titulo }}</span>
+                                        <span class="review-rating">{{ review.nota or 0 }}/5</span>
+                                    </div>
+                                    <p class="review-slide-text">{{ review.conteudo }}</p>
+                                    <div class="review-slide-footer">
+                                        <span class="review-date">
+                                            Atualizado em {{ review.updated_at.strftime('%d/%m/%Y') if review.updated_at else review.created_at.strftime('%d/%m/%Y') }}
+                                        </span>
+                                        <button class="review-edit-button" type="button" data-review-id="{{ review.id }}">Editar</button>
+                                    </div>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    {% else %}
+                        <div class="review-empty" id="reviewEmptyState">
+                            <p>Você ainda não escreveu nenhuma resenha. Clique em "Nova resenha" para começar.</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="review-pagination">
+                    <button class="review-nav" type="button" data-direction="prev" {% if not reviews or reviews|length <= 1 %}disabled{% endif %}>Anterior</button>
+                    <button class="review-nav" type="button" data-direction="next" {% if not reviews or reviews|length <= 1 %}disabled{% endif %}>Próxima</button>
+                </div>
+            </div>
+
+            <div class="review-modal" id="reviewModal" hidden>
+                <div class="review-modal-backdrop" data-review-modal-close></div>
+                <div class="review-modal-card">
+                    <div class="review-modal-head">
+                        <div>
+                            <span class="card-kicker">Resenha</span>
+                            <h2 id="reviewModalTitle">Nova resenha</h2>
+                        </div>
+                        <button class="review-modal-close" type="button" data-review-modal-close>&times;</button>
+                    </div>
+
+                    <form id="reviewForm" class="review-form">
+                        <input type="hidden" name="review_id" id="reviewIdInput">
+
+                        <label for="filmeTitulo">Título do filme</label>
+                        <input id="filmeTitulo" name="filme_titulo" type="text" maxlength="255" required>
+
+                        <label for="reviewRating">Nota</label>
+                        <input id="reviewRating" name="nota" type="number" min="0" max="5" step="1" value="0">
+
+                        <label for="reviewContent">Resenha</label>
+                        <textarea id="reviewContent" name="conteudo" rows="6" maxlength="1200" required></textarea>
+
+                        <div class="review-form-actions">
+                            <button type="button" class="hero-link" data-review-delete hidden id="deleteReviewButton">Excluir</button>
+                            <button type="submit" class="hero-link hero-link--primary">Salvar resenha</button>
+                        </div>
+
+                        <p class="field-error" id="reviewFormError" hidden></p>
+                    </form>
+                </div>
+            </div>
+        </section>
     </main>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>

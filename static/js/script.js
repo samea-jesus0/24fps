@@ -285,6 +285,307 @@ function previewImage(event) {
     }
 }
 
+const REVIEW_API_BASE = "/perfil/reviews";
+
+function formatReviewDate(dateString) {
+    if (!dateString) {
+        return "Hoje";
+    }
+
+    const parsed = new Date(dateString);
+    if (Number.isNaN(parsed.getTime())) {
+        return dateString;
+    }
+
+    return parsed.toLocaleDateString("pt-BR");
+}
+
+function createReviewSlideMarkup(review) {
+    return `
+        <article class="review-slide is-active" data-review-id="${escapeHtml(review.id)}">
+            <div class="review-slide-copy">
+                <div class="review-slide-top">
+                    <span class="review-film">${escapeHtml(review.filme_titulo)}</span>
+                    <span class="review-rating">${escapeHtml(review.nota || 0)}/5</span>
+                </div>
+                <p class="review-slide-text">${escapeHtml(review.conteudo).replace(/\n/g, "<br>")}</p>
+                <div class="review-slide-footer">
+                    <span class="review-date">Atualizado em ${formatReviewDate(review.updated_at || review.created_at)}</span>
+                    <button class="review-edit-button" type="button" data-review-id="${escapeHtml(review.id)}">Editar</button>
+                </div>
+            </div>
+        </article>
+    `;
+}
+
+function getReviewSlides() {
+    return Array.from(document.querySelectorAll(".review-slide"));
+}
+
+function updateCarouselButtons() {
+    const slides = getReviewSlides();
+    const prevButton = document.querySelector(".review-nav[data-direction='prev']");
+    const nextButton = document.querySelector(".review-nav[data-direction='next']");
+    const activeIndex = slides.findIndex((slide) => slide.classList.contains("is-active"));
+
+    if (!prevButton || !nextButton) {
+        return;
+    }
+
+    prevButton.disabled = activeIndex <= 0;
+    nextButton.disabled = activeIndex === -1 || activeIndex >= slides.length - 1;
+}
+
+function showReviewSlide(index) {
+    const slides = getReviewSlides();
+    slides.forEach((slide, slideIndex) => {
+        slide.classList.toggle("is-active", slideIndex === index);
+    });
+    updateCarouselButtons();
+}
+
+function showReviewModal(mode = "create", review = null) {
+    const modal = document.getElementById("reviewModal");
+    const title = document.getElementById("reviewModalTitle");
+    const reviewIdInput = document.getElementById("reviewIdInput");
+    const filmeTitulo = document.getElementById("filmeTitulo");
+    const reviewRating = document.getElementById("reviewRating");
+    const reviewContent = document.getElementById("reviewContent");
+    const deleteButton = document.getElementById("deleteReviewButton");
+    const errorElement = document.getElementById("reviewFormError");
+
+    if (!modal || !title || !reviewIdInput || !filmeTitulo || !reviewRating || !reviewContent || !deleteButton || !errorElement) {
+        return;
+    }
+
+    modal.hidden = false;
+    title.textContent = mode === "edit" ? "Editar resenha" : "Nova resenha";
+    reviewIdInput.value = review?.id || "";
+    filmeTitulo.value = review?.filme_titulo || "";
+    reviewRating.value = review?.nota || 0;
+    reviewContent.value = review?.conteudo || "";
+    deleteButton.hidden = mode !== "edit";
+    errorElement.hidden = true;
+    errorElement.textContent = "";
+    document.body.style.overflow = "hidden";
+}
+
+function hideReviewModal() {
+    const modal = document.getElementById("reviewModal");
+    if (!modal) {
+        return;
+    }
+
+    modal.hidden = true;
+    document.body.style.overflow = "";
+}
+
+function showReviewError(message) {
+    const errorElement = document.getElementById("reviewFormError");
+    if (!errorElement) {
+        return;
+    }
+
+    errorElement.textContent = message;
+    errorElement.hidden = false;
+}
+
+function clearReviewError() {
+    const errorElement = document.getElementById("reviewFormError");
+    if (!errorElement) {
+        return;
+    }
+
+    errorElement.textContent = "";
+    errorElement.hidden = true;
+}
+
+function getActiveSlideIndex() {
+    const slides = getReviewSlides();
+    return slides.findIndex((slide) => slide.classList.contains("is-active"));
+}
+
+function addOrUpdateSlide(review) {
+    const carousel = document.getElementById("reviewCarousel");
+    const emptyState = document.getElementById("reviewEmptyState");
+    const existingSlide = document.querySelector(`.review-slide[data-review-id='${review.id}']`);
+
+    if (emptyState) {
+        emptyState.remove();
+    }
+
+    if (existingSlide) {
+        existingSlide.outerHTML = createReviewSlideMarkup(review);
+    } else if (carousel) {
+        carousel.insertAdjacentHTML("beforeend", createReviewSlideMarkup(review));
+    }
+
+    const slides = getReviewSlides();
+    const newActive = Array.from(slides).findIndex((slide) => slide.dataset.reviewId === String(review.id));
+    if (newActive !== -1) {
+        showReviewSlide(newActive);
+    }
+}
+
+function removeReviewSlide(reviewId) {
+    const slide = document.querySelector(`.review-slide[data-review-id='${reviewId}']`);
+    if (slide) {
+        const slides = getReviewSlides();
+        const currentIndex = slides.indexOf(slide);
+        slide.remove();
+        const remainingSlides = getReviewSlides();
+
+        if (remainingSlides.length === 0) {
+            const carousel = document.getElementById("reviewCarousel");
+            if (carousel) {
+                carousel.innerHTML = `<div class="review-empty" id="reviewEmptyState"><p>Você ainda não escreveu nenhuma resenha. Clique em "Nova resenha" para começar.</p></div>`;
+            }
+            updateCarouselButtons();
+            return;
+        }
+
+        const nextIndex = Math.min(currentIndex, remainingSlides.length - 1);
+        showReviewSlide(nextIndex);
+    }
+}
+
+async function requestReview(url, options) {
+    const response = await fetch(url, options);
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.erro || "Ocorreu um erro ao processar sua solicitação.");
+    }
+    return data;
+}
+
+async function submitReviewForm(event) {
+    event.preventDefault();
+    clearReviewError();
+
+    const reviewId = document.getElementById("reviewIdInput").value;
+    const filmeTitulo = document.getElementById("filmeTitulo").value.trim();
+    const reviewRating = document.getElementById("reviewRating").value;
+    const reviewContent = document.getElementById("reviewContent").value.trim();
+
+    if (!filmeTitulo || !reviewContent) {
+        showReviewError("Preencha o título do filme e a resenha.");
+        return;
+    }
+
+    const payload = {
+        filme_titulo: filmeTitulo,
+        conteudo: reviewContent,
+        nota: Number(reviewRating || 0),
+    };
+
+    try {
+        const url = reviewId ? `${REVIEW_API_BASE}/${reviewId}` : REVIEW_API_BASE;
+        const method = reviewId ? "PUT" : "POST";
+        const result = await requestReview(url, {
+            method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
+
+        addOrUpdateSlide(result);
+        hideReviewModal();
+    } catch (error) {
+        showReviewError(error.message);
+    }
+}
+
+async function deleteReview(event) {
+    const reviewId = document.getElementById("reviewIdInput").value;
+    if (!reviewId) {
+        return;
+    }
+
+    try {
+        await requestReview(`${REVIEW_API_BASE}/${reviewId}`, { method: "DELETE" });
+        removeReviewSlide(reviewId);
+        hideReviewModal();
+    } catch (error) {
+        showReviewError(error.message);
+    }
+}
+
+function openEditReview(reviewId) {
+    const slide = document.querySelector(`.review-slide[data-review-id='${reviewId}']`);
+    if (!slide) {
+        return;
+    }
+
+    const filmeTitulo = slide.querySelector(".review-film")?.textContent || "";
+    const nota = slide.querySelector(".review-rating")?.textContent?.split("/")[0]?.trim() || "0";
+    const conteudo = slide.querySelector(".review-slide-text")?.textContent || "";
+
+    showReviewModal("edit", {
+        id: reviewId,
+        filme_titulo: filmeTitulo,
+        nota: Number(nota),
+        conteudo,
+    });
+}
+
+function bindReviewEvents() {
+    const openButton = document.getElementById("openReviewModalButton");
+    const modal = document.getElementById("reviewModal");
+    const reviewForm = document.getElementById("reviewForm");
+    const deleteButton = document.getElementById("deleteReviewButton");
+    const carousel = document.getElementById("reviewCarousel");
+
+    if (openButton) {
+        openButton.addEventListener("click", () => showReviewModal("create"));
+    }
+
+    if (modal) {
+        modal.addEventListener("click", (event) => {
+            if (event.target.closest("[data-review-modal-close]")) {
+                hideReviewModal();
+            }
+        });
+    }
+
+    if (reviewForm) {
+        reviewForm.addEventListener("submit", submitReviewForm);
+    }
+
+    if (deleteButton) {
+        deleteButton.addEventListener("click", deleteReview);
+    }
+
+    if (carousel) {
+        carousel.addEventListener("click", (event) => {
+            const editButton = event.target.closest(".review-edit-button");
+            if (editButton) {
+                openEditReview(editButton.dataset.reviewId);
+                return;
+            }
+        });
+    }
+
+    document.querySelectorAll(".review-nav").forEach((button) => {
+        button.addEventListener("click", () => {
+            const slides = getReviewSlides();
+            const currentIndex = getActiveSlideIndex();
+
+            if (button.dataset.direction === "prev") {
+                showReviewSlide(Math.max(0, currentIndex - 1));
+            } else {
+                showReviewSlide(Math.min(slides.length - 1, currentIndex + 1));
+            }
+        });
+    });
+}
+
+function initializeReviewCarousel() {
+    const slides = getReviewSlides();
+    if (slides.length > 0 && getActiveSlideIndex() === -1) {
+        slides[0].classList.add("is-active");
+    }
+    updateCarouselButtons();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const toast = document.getElementById("toast");
     if (toast) {
@@ -317,4 +618,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll("[data-avatar-editor]").forEach((editor) => {
         initAvatarEditor(editor);
     });
+
+    bindReviewEvents();
+    initializeReviewCarousel();
 });

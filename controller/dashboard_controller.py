@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, current_app, flash
 from flask_login import login_required, current_user
 from extensions import db
+from models.review import Review
 import os
 import uuid
 
@@ -56,4 +57,9 @@ def dashboard():
             flash("Enquadramento atualizado com sucesso.")
         return redirect(url_for("main.dashboard"))
 
-    return render_template("perfil.html", user=current_user)
+    reviews = (
+        Review.query.filter_by(user_id=current_user.id)
+        .order_by(Review.updated_at.desc(), Review.created_at.desc())
+        .all()
+    )
+    return render_template("perfil.html", user=current_user, reviews=reviews)

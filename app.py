@@ -65,6 +65,8 @@ def create_app():
     with app.app_context():
         from models.user import User
         from models.pesquisa import Search
+        from models.review import Review
+
         db.create_all()
         ensure_user_avatar_columns()
         

@@ -26,8 +26,157 @@
       <button onclick="buscarFilme()">Pesquisar</button>
     </div>
 
+<<<<<<< Updated upstream
     <div id="resultado"></div>
   </div>
+=======
+    <section class="hero-grid">
+      <article class="panel intro-panel reveal">
+        <span class="eyebrow">24FPS</span>
+        <h1>Seja bem-vindo ao 24FPS, uma página de catágolo de filmes.</h1>
+
+        <div class="hero-actions">
+          {% if current_user.is_authenticated %}
+          <a class="hero-link" href="{{ url_for('catalogo.catalogo') }}">ver catalogo</a>
+          <a class="hero-link hero-link--primary" href="{{ url_for('perfil.perfil') }}">abrir perfil</a>
+          <a class="hero-link" href="#movieSearchForm">buscar filme</a>
+          {% else %}
+          <a class="hero-link hero-link--primary" href="{{ url_for('auth.login') }}">entrar</a>
+          <a class="hero-link" href="{{ url_for('auth.register') }}">criar conta</a>
+          {% endif %}
+        </div>
+
+        <ul class="mini-stats">
+          <li>
+            <strong>Old Boy</strong>
+            <span>Plot-twist, muita pohadaria e martelada.</span>
+          </li>
+          <li>
+            <strong>haters to friends to lovers</strong>
+            <span>nada melhor que dividir uma cama</span>
+          </li>
+          <li>
+            <strong>Twink</strong>
+            <span>Piu Piu</span>
+          </li>
+        </ul>
+      </article>
+
+      <article class="panel poster-panel reveal reveal-delay-1">
+        <div class="poster-art">
+          <div class="poster-sun" aria-hidden="true"></div>
+          <div class="poster-card">
+            <span class="poster-tag">Estante</span>
+            <h2>Pesquise qualquer filme que tenha em mente</h2>
+            <p>Nosso catalogo de filmes contém mais de 100000 títulos.</p>
+          </div>
+        </div>
+      </article>
+
+      <aside class="panel mood-panel reveal reveal-delay-2">
+        <span class="eyebrow">Qual é o mood da noite?</span>
+        <h2>Comece pela sensação que você quer ver em tela.</h2>
+
+        <ul class="mood-list">
+          <li>slow cinema para domingo</li>
+          <li>thriller elegante de madrugada</li>
+          <li>romance melancolico e bonito</li>
+          <li>animacao para sonhar mais alto</li>
+        </ul>
+
+        {% if current_user.is_authenticated %}
+        <a class="profile-chip" href="{{ url_for('perfil.perfil') }}">
+          <img
+            src="{{ url_for('static', filename='uploads/' ~ current_avatar) }}?{{ range(1,1000)|random }}"
+            alt="Foto de perfil"
+            style="--pos-x: {{ current_user.foto_pos_x or 50 }}%; --pos-y: {{ current_user.foto_pos_y or 50 }}%;">
+
+          <div>
+            <strong>Seu canto</strong>
+            <span>Atualize sua foto e siga explorando</span>
+          </div>
+        </a>
+        <a class="ghost-link" href="{{ url_for('auth.logout') }}">sair da sessão</a>
+        {% else %}
+        <a class="profile-chip profile-chip--invite" href="{{ url_for('auth.register') }}">
+          <div>
+            <strong>Crie seu perfil</strong>
+            <span>Organize sua experiência como diário cinéfilo</span>
+          </div>
+        </a>
+        {% endif %}
+      </aside>
+    </section>
+
+    <section class="search-board reveal reveal-delay-3">
+      <div class="search-copy">
+        <span class="eyebrow">Ache um filme</span>
+        <h2>Busque um filme e abra uma ficha com poster, clima, equipe e nota.</h2>
+        <p>O resultado aparece logo abaixo em um cartão editorial, pronto para explorar sem poluição visual.</p>
+      </div>
+
+      <form id="movieSearchForm" class="search-box">
+        <label class="sr-only" for="movieInput">Nome do filme</label>
+        <input type="text" id="movieInput" placeholder="Ex.: Past Lives, Parasite, Perfect Blue" autocomplete="off">
+        <button type="submit">Procurar</button>
+      </form>
+
+      <div class="suggestion-row">
+        <button type="button" class="suggestion-chip" data-title="Past Lives">Past Lives</button>
+        <button type="button" class="suggestion-chip" data-title="Parasite">Parasite</button>
+        <button type="button" class="suggestion-chip" data-title="Aftersun">Aftersun</button>
+        <button type="button" class="suggestion-chip" data-title="Perfect Blue">Perfect Blue</button>
+      </div>
+    </section>
+
+    <section class="search-board user-search-board reveal reveal-delay-4">
+      <div class="search-copy">
+        <span class="eyebrow">Ache pessoas</span>
+        <h2>Procure usuarios do 24FPS e abra perfis publicos compartilhaveis.</h2>
+        <p>Visitantes tambem podem visualizar nomes, fotos, biografias, resenhas e atividades publicas.</p>
+      </div>
+
+      <form id="userSearchForm" class="search-box">
+        <label class="sr-only" for="userSearchInput">Nome do usuario</label>
+        <input type="search" id="userSearchInput" placeholder="Ex.: Ana, Felipe, Maria" autocomplete="off">
+        <button type="submit">Procurar usuarios</button>
+      </form>
+
+      <div id="userSearchResults" class="user-search-results" aria-live="polite"></div>
+    </section>
+
+    <section class="content-grid">
+      <aside class="panel notebook-panel reveal reveal-delay-4">
+        <span class="eyebrow">Watchlist</span>
+        <h3>Como usar esta página</h3>
+
+        <ul class="note-list">
+          <li>Procure pelo título completo para respostas mais precisas.</li>
+          <li>Use as sugestões para testar o layout e a busca rapidamente.</li>
+          <li>Abra seu perfil para manter a experiência visual consistente.</li>
+        </ul>
+
+        <div class="mini-review">
+          <span class="mini-review__label">Reviews</span>
+          <p>Faça sua própria crítica e compartilhe com a comunidade.</p>
+        </div>
+      </aside>
+
+      <section class="result-stage reveal reveal-delay-5">
+        <div id="resultado" class="result-frame">
+          <div class="result-empty">
+            <span class="result-empty__tag">Pronto para descobrir</span>
+            <h3>Sua próxima obsessão cinematográfica aparece aqui.</h3>
+            <p>
+              Digite um título para ver poster, sinopse, equipe criativa, elenco e detalhes da obra em um cartão
+              com clima de diário de cinema.
+            </p>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+>>>>>>> Stashed changes
 
   <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>

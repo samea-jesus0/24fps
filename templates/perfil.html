@@ -44,7 +44,232 @@
 
     </div>
 
+<<<<<<< Updated upstream
 </div>
  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+=======
+    <div class="page-noise" aria-hidden="true"></div>
+
+    <main class="profile-shell">
+        <header class="profile-topbar">
+            <div class="profile-dots" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <div class="profile-address">https://24fps.cinema/perfil.com</div>
+
+            <nav class="profile-nav">
+                <a class="profile-tab" href="{{ url_for('movie.index') }}">Descobrir</a>
+                <a class="profile-tab" href="{{ url_for('catalogo.catalogo') }}">Catalogo</a>
+                <a class="profile-tab is-active" href="{{ url_for('main.dashboard') }}">perfil</a>
+                <a class="profile-tab profile-tab--accent" href="{{ url_for('auth.logout') }}">sair</a>
+            </nav>
+        </header>
+
+        <section class="profile-hero">
+            <article class="hero-copy reveal">
+                <span class="eyebrow">Meu Perfil</span>
+                <h1>24FPS</h1>
+                <div class="hero-links">
+                    <a class="hero-link hero-link--primary" href="{{ url_for('movie.index') }}">voltar para Descobrir</a>
+                    <a class="hero-link" href="{{ url_for('catalogo.catalogo') }}">abrir catalogo</a>
+                    <a class="hero-link" href="{{ url_for('users.public_profile', user_id=user.id) }}">perfil publico</a>
+                    <a class="hero-link" href="#profileForm">trocar foto</a>
+                </div>
+            </article>
+
+            <aside class="hero-notes reveal reveal-delay-1">
+                <span class="eyebrow">Dicas rápidas</span>
+                <ul class="note-list">
+                    <li>O preview aparece antes de salvar.</li>
+                    <li>Depois disso, a home e o perfil ficam visualmente alinhados.</li>
+                </ul>
+            </aside>
+        </section>
+
+        <section class="profile-grid" data-avatar-editor>
+            <article class="identity-card reveal reveal-delay-2">
+                <div class="avatar-frame">
+                    <img
+                        data-avatar-preview
+                        src="{{ url_for('static', filename='uploads/' + current_avatar) }}?{{ range(1,1000)|random }}"
+                        class="profile-img"
+                        alt="Foto de perfil de {{ user.nome }}"
+                        style="--avatar-pos-x: {{ user.foto_pos_x or 50 }}%; --avatar-pos-y: {{ user.foto_pos_y or 50 }}%;">
+                </div>
+
+                <span class="card-kicker">Card do perfil</span>
+                <h2>{{ user.nome }}</h2>
+                <p class="identity-email">{{ user.email }}</p>
+            </article>
+
+            <article class="editor-card reveal reveal-delay-3">
+                <div class="editor-head">
+                    <span class="card-kicker">Atualizar</span>
+                    <h2>Atualize sua foto</h2>
+                    <p>Escolha uma imagem e veja o preview antes de salvar.</p>
+                </div>
+
+                <form id="profileForm" class="profile-form" method="POST" action="{{ url_for('main.dashboard') }}" enctype="multipart/form-data">
+                    <div class="avatar-editor-panel">
+                        <div class="avatar-preview-panel">
+                            <div class="avatar-preview-shell avatar-preview-shell--profile">
+                                <img
+                                    data-avatar-preview
+                                    class="avatar-preview-image"
+                                    src="{{ url_for('static', filename='uploads/' + current_avatar) }}?{{ range(1,1000)|random }}"
+                                    alt="Preview da foto de perfil"
+                                    style="--avatar-pos-x: {{ user.foto_pos_x or 50 }}%; --avatar-pos-y: {{ user.foto_pos_y or 50 }}%;">
+                            </div>
+                            <p class="avatar-preview-caption">Assim sua foto aparecera no perfil</p>
+                        </div>
+
+                        <div class="avatar-editor-fields">
+                            <label for="profile-photo">Nova foto de perfil</label>
+                            <input
+                                id="profile-photo"
+                                type="file"
+                                name="foto"
+                                accept=".png,.jpg,.jpeg,.gif,image/png,image/jpeg,image/gif"
+                                data-avatar-input>
+
+                            <p class="field-help">Extensoes aceitas: PNG, JPG, JPEG e GIF. Tamanho maximo: 2 MB.</p>
+                            <p class="field-error" data-file-error hidden></p>
+                        </div>
+                    </div>
+
+                    <div class="avatar-controls">
+                        <div class="range-group">
+                            <div class="range-label-row">
+                                <label for="profile-photo-pos-x">Posicao horizontal</label>
+                                <span data-avatar-pos-x-value>{{ user.foto_pos_x or 50 }}%</span>
+                            </div>
+                            <input
+                                id="profile-photo-pos-x"
+                                type="range"
+                                min="0"
+                                max="100"
+                                value="{{ user.foto_pos_x or 50 }}"
+                                name="foto_pos_x"
+                                data-avatar-pos-x>
+                        </div>
+
+                        <div class="range-group">
+                            <div class="range-label-row">
+                                <label for="profile-photo-pos-y">Posicao vertical</label>
+                                <span data-avatar-pos-y-value>{{ user.foto_pos_y or 50 }}%</span>
+                            </div>
+                            <input
+                                id="profile-photo-pos-y"
+                                type="range"
+                                min="0"
+                                max="100"
+                                value="{{ user.foto_pos_y or 50 }}"
+                                name="foto_pos_y"
+                                data-avatar-pos-y>
+                        </div>
+                    </div>
+
+                    <div class="form-tips">
+                        <span>PNG, JPG, JPEG e GIF</span>
+                        <span>Preview redondo com enquadramento</span>
+                        <span>Tamanho maximo: 2 MB</span>
+                    </div>
+
+                    <button type="submit">Salvar nova foto</button>
+                </form>
+            </article>
+        </section>
+
+        <section class="profile-reviews reveal reveal-delay-4">
+            <div class="review-header">
+                <div>
+                    <span class="eyebrow">Resenhas</span>
+                    <h2>Seus reviews de filmes</h2>
+                    <p>Crie, edite ou remova suas resenhas aqui. Cada filme ganha um slide dentro do seu perfil.</p>
+                </div>
+                <button class="hero-link hero-link--primary" type="button" id="openReviewModalButton">Nova resenha</button>
+            </div>
+
+            <div class="review-shell">
+                <div class="review-carousel" id="reviewCarousel">
+                    {% if reviews %}
+                        {% for review in reviews %}
+                            <article class="review-slide {% if loop.first %}is-active{% endif %}" data-review-id="{{ review.id }}">
+                                <div class="review-slide-copy">
+                                    {% if review.poster_url %}
+                                    <div class="review-poster">
+                                        <img src="{{ review.poster_url }}" alt="Poster de {{ review.filme_titulo }}" loading="lazy">
+                                    </div>
+                                    {% endif %}
+                                    <div class="review-slide-top">
+                                        <span class="review-film">{{ review.filme_titulo }}</span>
+                                        <span class="review-rating">{{ review.nota or 0 }}/5</span>
+                                    </div>
+                                    <p class="review-slide-text">{{ review.conteudo }}</p>
+                                    <div class="review-slide-footer">
+                                        <a class="review-author-link" href="{{ url_for('users.public_profile', user_id=user.id) }}">
+                                            por {{ user.display_name or user.nome }}
+                                        </a>
+                                        <span class="review-date">
+                                            Atualizado em {{ review.updated_at.strftime('%d/%m/%Y') if review.updated_at else review.created_at.strftime('%d/%m/%Y') }}
+                                        </span>
+                                        <button class="review-edit-button" type="button" data-review-id="{{ review.id }}">Editar</button>
+                                    </div>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    {% else %}
+                        <div class="review-empty" id="reviewEmptyState">
+                            <p>Você ainda não escreveu nenhuma resenha. Clique em "Nova resenha" para começar.</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="review-pagination">
+                    <button class="review-nav" type="button" data-direction="prev" {% if not reviews or reviews|length <= 1 %}disabled{% endif %}>Anterior</button>
+                    <button class="review-nav" type="button" data-direction="next" {% if not reviews or reviews|length <= 1 %}disabled{% endif %}>Próxima</button>
+                </div>
+            </div>
+
+            <div class="review-modal" id="reviewModal" hidden>
+                <div class="review-modal-backdrop" data-review-modal-close></div>
+                <div class="review-modal-card">
+                    <div class="review-modal-head">
+                        <div>
+                            <span class="card-kicker">Resenha</span>
+                            <h2 id="reviewModalTitle">Nova resenha</h2>
+                        </div>
+                        <button class="review-modal-close" type="button" data-review-modal-close>&times;</button>
+                    </div>
+
+                    <form id="reviewForm" class="review-form">
+                        <input type="hidden" name="review_id" id="reviewIdInput">
+
+                        <label for="filmeTitulo">Título do filme</label>
+                        <input id="filmeTitulo" name="filme_titulo" type="text" maxlength="255" autocomplete="off" placeholder="Digite para buscar na OMDb" required>
+
+                        <label for="reviewRating">Nota</label>
+                        <input id="reviewRating" name="nota" type="number" min="0" max="5" step="1" value="0">
+
+                        <label for="reviewContent">Resenha</label>
+                        <textarea id="reviewContent" name="conteudo" rows="6" maxlength="1200" required></textarea>
+
+                        <div class="review-form-actions">
+                            <button type="button" class="hero-link" data-review-delete hidden id="deleteReviewButton">Excluir</button>
+                            <button type="submit" class="hero-link hero-link--primary">Salvar resenha</button>
+                        </div>
+
+                        <p class="field-error" id="reviewFormError" hidden></p>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+>>>>>>> Stashed changes
 </body>
 </html>

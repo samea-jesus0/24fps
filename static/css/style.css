@@ -87,9 +87,93 @@ h1 {
     white-space: nowrap;
 }
 
+<<<<<<< Updated upstream
 .search-box button:hover {
     background: #ffe1ac;
     color: #2A2A34;
+=======
+.user-search-board {
+    margin-top: 24px;
+}
+
+.user-search-results {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.user-result-card {
+    display: grid;
+    grid-template-columns: 62px minmax(0, 1fr);
+    gap: 14px;
+    align-items: center;
+    padding: 14px;
+    border-radius: 20px;
+    border: 2px solid rgba(110, 91, 47, 0.16);
+    background: #fff7e4;
+    color: var(--ink);
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.user-result-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(93, 72, 31, 0.14);
+}
+
+.user-result-card img {
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(103, 85, 48, 0.16);
+    background: var(--sage);
+}
+
+.user-result-card div {
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+}
+
+.user-result-card strong,
+.user-result-card span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-result-card strong {
+    font-size: 1rem;
+    font-weight: 900;
+}
+
+.user-result-card span {
+    color: var(--muted);
+    font-size: 0.92rem;
+    font-weight: 700;
+}
+
+.user-search-note {
+    grid-column: 1 / -1;
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: rgba(140, 171, 79, 0.13);
+    color: var(--olive-dark);
+    font-weight: 900;
+}
+
+.user-search-note--error {
+    background: rgba(201, 107, 95, 0.14);
+    color: var(--tomato);
+}
+
+.reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    animation: rise 0.8s ease forwards;
+>>>>>>> Stashed changes
 }
 
 .card {
@@ -175,4 +259,12 @@ h1 {
         width: 100%; /* Imagem ocupa toda a largura disponível */
         max-width: 250px; /* Limita largura máxima */
     }
+<<<<<<< Updated upstream
 }
+=======
+
+    .user-search-results {
+        grid-template-columns: 1fr;
+    }
+}
+>>>>>>> Stashed changes

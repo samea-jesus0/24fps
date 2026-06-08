@@ -40,30 +40,11 @@
             <nav class="profile-nav">
                 <a class="profile-tab" href="{{ url_for('movie.index') }}">Descobrir</a>
                 <a class="profile-tab" href="{{ url_for('catalogo.catalogo') }}">Catalogo</a>
+                <a class="profile-tab" href="{{ url_for('users.directory') }}">Plateia</a>
                 <a class="profile-tab is-active" href="{{ url_for('main.dashboard') }}">perfil</a>
                 <a class="profile-tab profile-tab--accent" href="{{ url_for('auth.logout') }}">sair</a>
             </nav>
         </header>
-
-        <section class="profile-hero">
-            <article class="hero-copy reveal">
-                <span class="eyebrow">Meu Perfil</span>
-                <h1>24FPS</h1>
-                <div class="hero-links">
-                    <a class="hero-link hero-link--primary" href="{{ url_for('movie.index') }}">voltar para Descobrir</a>
-                    <a class="hero-link" href="{{ url_for('catalogo.catalogo') }}">abrir catalogo</a>
-                    <a class="hero-link" href="#profileForm">trocar foto</a>
-                </div>
-            </article>
-
-            <aside class="hero-notes reveal reveal-delay-1">
-                <span class="eyebrow">Dicas rápidas</span>
-                <ul class="note-list">
-                    <li>O preview aparece antes de salvar.</li>
-                    <li>Depois disso, a home e o perfil ficam visualmente alinhados.</li>
-                </ul>
-            </aside>
-        </section>
 
         <section class="profile-grid" data-avatar-editor>
             <article class="identity-card reveal reveal-delay-2">
@@ -173,23 +154,31 @@
                 <div class="review-carousel" id="reviewCarousel">
                     {% if reviews %}
                         {% for review in reviews %}
-                            <article class="review-slide {% if loop.first %}is-active{% endif %}" data-review-id="{{ review.id }}">
-                                <div class="review-slide-copy">
+                            <article
+                                class="review-slide {% if review.poster_url %}review-slide--with-poster{% else %}review-slide--no-poster{% endif %} {% if loop.first %}is-active{% endif %}"
+                                data-review-id="{{ review.id }}"
+                                data-review-movie-id="{{ review.filme_id or '' }}"
+                                data-review-poster-url="{{ review.poster_url or '' }}"
+                                data-review-created-at="{{ review.created_at.isoformat() if review.created_at else '' }}"
+                                data-review-updated-at="{{ review.updated_at.isoformat() if review.updated_at else '' }}">
+                                <div class="review-slide-layout">
                                     {% if review.poster_url %}
                                     <div class="review-poster">
                                         <img src="{{ review.poster_url }}" alt="Poster de {{ review.filme_titulo }}" loading="lazy">
                                     </div>
                                     {% endif %}
-                                    <div class="review-slide-top">
-                                        <span class="review-film">{{ review.filme_titulo }}</span>
-                                        <span class="review-rating">{{ review.nota or 0 }}/5</span>
-                                    </div>
-                                    <p class="review-slide-text">{{ review.conteudo }}</p>
-                                    <div class="review-slide-footer">
-                                        <span class="review-date">
-                                            Atualizado em {{ review.updated_at.strftime('%d/%m/%Y') if review.updated_at else review.created_at.strftime('%d/%m/%Y') }}
-                                        </span>
-                                        <button class="review-edit-button" type="button" data-review-id="{{ review.id }}">Editar</button>
+                                    <div class="review-slide-copy">
+                                        <div class="review-slide-top">
+                                            <span class="review-film">{{ review.filme_titulo }}</span>
+                                            <span class="review-rating">{{ review.nota or 0 }}/5</span>
+                                        </div>
+                                        <p class="review-slide-text">{{ review.conteudo }}</p>
+                                        <div class="review-slide-footer">
+                                            <span class="review-date">
+                                                Atualizado em {{ review.updated_at.strftime('%d/%m/%Y') if review.updated_at else review.created_at.strftime('%d/%m/%Y') }}
+                                            </span>
+                                            <button class="review-edit-button" type="button" data-review-id="{{ review.id }}">Editar</button>
+                                        </div>
                                     </div>
                                 </div>
                             </article>
@@ -207,40 +196,237 @@
                 </div>
             </div>
 
-            <div class="review-modal" id="reviewModal" hidden>
-                <div class="review-modal-backdrop" data-review-modal-close></div>
-                <div class="review-modal-card">
-                    <div class="review-modal-head">
-                        <div>
-                            <span class="card-kicker">Resenha</span>
-                            <h2 id="reviewModalTitle">Nova resenha</h2>
-                        </div>
-                        <button class="review-modal-close" type="button" data-review-modal-close>&times;</button>
-                    </div>
+        </section>
 
-                    <form id="reviewForm" class="review-form">
-                        <input type="hidden" name="review_id" id="reviewIdInput">
-
-                        <label for="filmeTitulo">Título do filme</label>
-                        <input id="filmeTitulo" name="filme_titulo" type="text" maxlength="255" autocomplete="off" placeholder="Digite para buscar na OMDb" required>
-
-                        <label for="reviewRating">Nota</label>
-                        <input id="reviewRating" name="nota" type="number" min="0" max="5" step="1" value="0">
-
-                        <label for="reviewContent">Resenha</label>
-                        <textarea id="reviewContent" name="conteudo" rows="6" maxlength="1200" required></textarea>
-
-                        <div class="review-form-actions">
-                            <button type="button" class="hero-link" data-review-delete hidden id="deleteReviewButton">Excluir</button>
-                            <button type="submit" class="hero-link hero-link--primary">Salvar resenha</button>
-                        </div>
-
-                        <p class="field-error" id="reviewFormError" hidden></p>
-                    </form>
+        <section class="profile-wishlists reveal reveal-delay-4">
+            <div class="review-header">
+                <div>
+                    <span class="eyebrow">Wishlists</span>
+                    <h2>Suas listas para organizar filmes</h2>
+                    <p>Crie wishlists publicas ou privadas para separar ideias de sessao, maratonas ou filmes para ver depois.</p>
                 </div>
+                <button class="hero-link hero-link--primary" type="button" id="openWishlistModalButton">Nova wishlist</button>
             </div>
+
+            <div class="wishlist-grid" id="wishlistGrid">
+                {% if wishlists %}
+                    {% for wishlist in wishlists %}
+                    <article
+                        class="wishlist-card"
+                        data-wishlist-id="{{ wishlist.id }}"
+                        data-wishlist-title="{{ wishlist.title }}"
+                        data-wishlist-description="{{ wishlist.description or '' }}"
+                        data-wishlist-is-public="{{ 'true' if wishlist.isPublic else 'false' }}"
+                        data-wishlist-page="0">
+                        <div class="wishlist-card-head">
+                            <span class="card-kicker">Lista</span>
+                            <span class="wishlist-visibility">{{ wishlist.visibilityLabel }}</span>
+                        </div>
+                        <h3>{{ wishlist.title }}</h3>
+                        <p>{{ wishlist.description if wishlist.description else "Wishlist criada para voce comecar a organizar filmes em uma lista propria." }}</p>
+                        <div class="wishlist-meta">
+                            <span>{{ wishlist.movieCount }} filmes</span>
+                            <span>Criada em {{ wishlist.createdAtLabel }}</span>
+                        </div>
+                        <div class="wishlist-card-actions">
+                            <button
+                                class="wishlist-action-button"
+                                type="button"
+                                data-open-wishlist-movie-modal
+                                data-wishlist-id="{{ wishlist.id }}"
+                                data-wishlist-title="{{ wishlist.title }}">
+                                Adicionar filme
+                            </button>
+                            <button
+                                class="wishlist-action-button wishlist-action-button--ghost"
+                                type="button"
+                                data-edit-wishlist
+                                data-wishlist-id="{{ wishlist.id }}">
+                                Editar
+                            </button>
+                            <button
+                                class="wishlist-action-button wishlist-action-button--danger"
+                                type="button"
+                                data-delete-wishlist
+                                data-wishlist-id="{{ wishlist.id }}"
+                                data-wishlist-title="{{ wishlist.title }}">
+                                Excluir
+                            </button>
+                        </div>
+                        <div
+                            class="wishlist-movie-list"
+                            data-wishlist-movies='{{ wishlist.movies|tojson|forceescape }}'
+                            data-wishlist-page="0">
+                            {% if wishlist.movies %}
+                                <div class="wishlist-movie-grid">
+                                    {% for movie in wishlist.movies[:5] %}
+                                    <article
+                                        class="wishlist-movie-item"
+                                        data-wishlist-movie-id="{{ movie.id }}"
+                                        data-movie-id="{{ movie.movieId or '' }}"
+                                        data-movie-title="{{ movie.title }}"
+                                        data-movie-poster-url="{{ movie.posterUrl or '' }}">
+                                        <div class="wishlist-movie-poster" aria-hidden="true">
+                                            {% if movie.posterUrl %}
+                                            <img src="{{ movie.posterUrl }}" alt="Poster de {{ movie.title }}" loading="lazy">
+                                            {% else %}
+                                            <span>Poster</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="wishlist-movie-copy">
+                                            <strong>{{ movie.title }}</strong>
+                                        </div>
+                                        <button
+                                            class="wishlist-movie-remove"
+                                            type="button"
+                                            data-remove-wishlist-movie
+                                            data-wishlist-id="{{ wishlist.id }}"
+                                            data-wishlist-movie-id="{{ movie.id }}"
+                                            aria-label="Remover {{ movie.title }} da wishlist">
+                                            remover
+                                        </button>
+                                    </article>
+                                    {% endfor %}
+                                </div>
+                                {% set total_movie_pages = ((wishlist.movieCount or 0) + 4) // 5 %}
+                                <div class="wishlist-movie-pagination" {% if (wishlist.movieCount or 0) <= 5 %}hidden{% endif %}>
+                                    <button
+                                        class="wishlist-page-button"
+                                        type="button"
+                                        data-wishlist-page-action="prev"
+                                        data-wishlist-id="{{ wishlist.id }}"
+                                        disabled>
+                                        Anterior
+                                    </button>
+                                    <span class="wishlist-page-indicator">1 de {{ total_movie_pages if total_movie_pages > 0 else 1 }}</span>
+                                    <button
+                                        class="wishlist-page-button"
+                                        type="button"
+                                        data-wishlist-page-action="next"
+                                        data-wishlist-id="{{ wishlist.id }}"
+                                        {% if (wishlist.movieCount or 0) <= 5 %}disabled{% endif %}>
+                                        Proximo
+                                    </button>
+                                </div>
+                            {% else %}
+                                <p class="wishlist-movies-empty">Nenhum filme adicionado ainda. Clique em "Adicionar filme" para comecar.</p>
+                            {% endif %}
+                        </div>
+                    </article>
+                    {% endfor %}
+                {% else %}
+                    <div class="review-empty wishlist-empty" id="wishlistEmptyState">
+                        <p>Voce ainda nao criou nenhuma wishlist. Clique em "Nova wishlist" para montar sua primeira lista.</p>
+                    </div>
+                {% endif %}
+            </div>
+
         </section>
     </main>
+
+    <div class="review-modal review-modal--wide" id="reviewModal" hidden>
+        <div class="review-modal-backdrop" data-review-modal-close></div>
+        <div class="review-modal-card">
+            <div class="review-modal-head">
+                <div>
+                    <span class="card-kicker">Resenha</span>
+                    <h2 id="reviewModalTitle">Nova resenha</h2>
+                </div>
+                <button class="review-modal-close" type="button" data-review-modal-close>&times;</button>
+            </div>
+
+            <form id="reviewForm" class="review-form">
+                <input type="hidden" name="review_id" id="reviewIdInput">
+
+                <label for="filmeTitulo">Título do filme</label>
+                <input id="filmeTitulo" name="filme_titulo" type="text" maxlength="255" autocomplete="off" placeholder="Digite para buscar na OMDb" required>
+
+                <label for="reviewRating">Nota</label>
+                <input id="reviewRating" name="nota" type="number" min="0" max="5" step="1" value="0">
+
+                <label for="reviewContent">Resenha</label>
+                <textarea id="reviewContent" name="conteudo" rows="6" maxlength="1200" required></textarea>
+
+                <div class="review-form-actions">
+                    <button type="button" class="hero-link" data-review-delete hidden id="deleteReviewButton">Excluir</button>
+                    <button type="submit" class="hero-link hero-link--primary">Salvar resenha</button>
+                </div>
+
+                <p class="field-error" id="reviewFormError" hidden></p>
+            </form>
+        </div>
+    </div>
+
+    <div class="review-modal review-modal--wide" id="wishlistModal" hidden>
+        <div class="review-modal-backdrop" data-wishlist-modal-close></div>
+        <div class="review-modal-card">
+            <div class="review-modal-head">
+                <div>
+                    <span class="card-kicker">Wishlist</span>
+                    <h2 id="wishlistModalTitle">Nova wishlist</h2>
+                </div>
+                <button class="review-modal-close" type="button" data-wishlist-modal-close>&times;</button>
+            </div>
+
+            <form id="wishlistForm" class="review-form wishlist-form">
+                <input type="hidden" name="wishlist_id" id="wishlistIdInput">
+
+                <label for="wishlistTitle">Titulo da wishlist</label>
+                <input id="wishlistTitle" name="title" type="text" maxlength="120" placeholder="Ex.: Filmes para ver no domingo" required>
+
+                <label for="wishlistDescription">Descricao</label>
+                <textarea id="wishlistDescription" name="description" rows="5" maxlength="500" placeholder="Explique o tema da lista ou deixe uma observacao para voce."></textarea>
+
+                <label class="wishlist-visibility-field" for="wishlistPublic">
+                    <input id="wishlistPublic" name="is_public" type="checkbox" checked>
+                    <span>Deixar esta wishlist publica no seu perfil</span>
+                </label>
+
+                <p class="field-help">A lista nasce vazia e pronta para receber filmes depois. Voce pode criar quantas quiser.</p>
+
+                <div class="review-form-actions">
+                    <button type="submit" class="hero-link hero-link--primary" id="wishlistSubmitButton">Criar wishlist</button>
+                </div>
+
+                <p class="field-error" id="wishlistFormError" hidden></p>
+            </form>
+        </div>
+    </div>
+
+    <div class="review-modal review-modal--wide" id="wishlistMovieModal" hidden>
+        <div class="review-modal-backdrop" data-wishlist-movie-modal-close></div>
+        <div class="review-modal-card">
+            <div class="review-modal-head">
+                <div>
+                    <span class="card-kicker">Wishlist</span>
+                    <h2 id="wishlistMovieModalTitle">Adicionar filme</h2>
+                </div>
+                <button class="review-modal-close" type="button" data-wishlist-movie-modal-close>&times;</button>
+            </div>
+
+            <form id="wishlistMovieForm" class="review-form wishlist-movie-form">
+                <input type="hidden" name="wishlist_id" id="wishlistMovieWishlistId">
+
+                <label for="wishlistMovieTitle">Filme</label>
+                <input
+                    id="wishlistMovieTitle"
+                    name="movie_title"
+                    type="text"
+                    maxlength="255"
+                    autocomplete="off"
+                    placeholder="Digite para buscar na OMDb"
+                    required>
+
+                <p class="field-help" id="wishlistMovieHint">Escolha um filme para adicionar a esta wishlist.</p>
+
+                <div class="review-form-actions">
+                    <button type="submit" class="hero-link hero-link--primary" id="wishlistMovieSubmitButton">Adicionar filme</button>
+                </div>
+
+                <p class="field-error" id="wishlistMovieFormError" hidden></p>
+            </form>
+        </div>
+    </div>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>

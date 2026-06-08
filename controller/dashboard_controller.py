@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, curren
 from flask_login import login_required, current_user
 from extensions import db
 from models.review import Review
+from service.wishlist_service import list_user_wishlists
 import os
 import uuid
 
@@ -62,4 +63,5 @@ def dashboard():
         .order_by(Review.updated_at.desc(), Review.created_at.desc())
         .all()
     )
-    return render_template("perfil.html", user=current_user, reviews=reviews)
+    wishlists = list_user_wishlists(current_user.id)
+    return render_template("perfil.html", user=current_user, reviews=reviews, wishlists=wishlists)

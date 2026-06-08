@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify
 from extensions import db
 from models.pesquisa import Search
-from service.filme_service import buscar_filme_por_nome
+from service.filme_service import buscar_filme_por_id, buscar_filme_por_nome
 
 movie_bp = Blueprint("movie", __name__)
 
@@ -41,5 +41,28 @@ def sugestoes():
         return jsonify(sugestoes[:10])  # Limita a 10 sugestões
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
+
+
+@movie_bp.route("/api/movies/details", methods=["GET"])
+def movie_details():
+    imdb_id = (request.args.get("imdb_id") or "").strip()
+    titulo = (request.args.get("titulo") or request.args.get("nome") or "").strip()
+
+    if not imdb_id and not titulo:
+        return jsonify({"erro": "Informe um imdb_id ou titulo do filme."}), 400
+
+    try:
+        filme = buscar_filme_por_id(imdb_id) if imdb_id else buscar_filme_por_nome(titulo)
+        if not filme and imdb_id and titulo:
+            filme = buscar_filme_por_nome(titulo)
+    except RuntimeError as exc:
+        return jsonify({"erro": str(exc)}), 503
+    except Exception:
+        return jsonify({"erro": "Nao foi possivel carregar os detalhes do filme agora."}), 500
+
+    if not filme:
+        return jsonify({"erro": "Filme nao encontrado"}), 404
+
+    return jsonify(filme)
 
 

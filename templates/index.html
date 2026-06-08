@@ -47,6 +47,7 @@
     <div class="browser-toolbar">
       <a class="toolbar-tab is-active" href="{{ url_for('movie.index') }}">Descobrir</a>
       <a class="toolbar-tab" href="{{ url_for('catalogo.catalogo') if current_user.is_authenticated else url_for('auth.login') }}">Catalogo</a>
+      <a class="toolbar-tab" href="{{ url_for('users.directory') }}">Plateia</a>
       <a class="toolbar-tab" href="{{ url_for('perfil.perfil') if current_user.is_authenticated else url_for('auth.login') }}">Perfil</a>
       <span class="toolbar-note">Filmezin fica bom com pipoca e amigos</span>
     </div>
@@ -60,10 +61,12 @@
           {% if current_user.is_authenticated %}
           <a class="hero-link" href="{{ url_for('catalogo.catalogo') }}">ver catalogo</a>
           <a class="hero-link hero-link--primary" href="{{ url_for('perfil.perfil') }}">abrir perfil</a>
+          <a class="hero-link" href="{{ url_for('users.directory') }}">buscar plateia</a>
           <a class="hero-link" href="#movieSearchForm">buscar filme</a>
           {% else %}
           <a class="hero-link hero-link--primary" href="{{ url_for('auth.login') }}">entrar</a>
           <a class="hero-link" href="{{ url_for('auth.register') }}">criar conta</a>
+          <a class="hero-link" href="{{ url_for('users.directory') }}">explorar plateia</a>
           {% endif %}
         </div>
 

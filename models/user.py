@@ -7,6 +7,7 @@ class User(db.Model, UserMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100))
+    display_name = db.Column(db.String(100), nullable=True)
     email = db.Column(db.String(100), unique=True)
     senha = db.Column(db.String(200))
     bio = db.Column(db.Text, nullable=True)
@@ -17,6 +18,12 @@ class User(db.Model, UserMixin):
 
     reviews = db.relationship(
         "Review",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="dynamic",
+    )
+    wishlists = db.relationship(
+        "Wishlist",
         back_populates="user",
         cascade="all, delete-orphan",
         lazy="dynamic",

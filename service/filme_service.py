@@ -140,7 +140,7 @@ def _request_movie_by_id_cached(api_key, imdb_id):
 
     response = requests.get(
         OMDB_BASE_URL,
-        params={"i": imdb_id, "apikey": api_key, "plot": "short"},
+        params={"i": imdb_id, "apikey": api_key, "plot": "full"},
         timeout=10,
     )
     response.raise_for_status()
@@ -200,6 +200,12 @@ def _normalize_movie_data(data, source_rank=0):
 def buscar_filme_por_nome(nome_filme):
     api_key = _get_api_key()
     data = _request_movie_by_title_cached(api_key, nome_filme.strip())
+    return _normalize_movie_data(data)
+
+
+def buscar_filme_por_id(imdb_id):
+    api_key = _get_api_key()
+    data = _request_movie_by_id_cached(api_key, imdb_id.strip())
     return _normalize_movie_data(data)
 
 

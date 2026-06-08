@@ -44,6 +44,7 @@
             <nav class="profile-nav">
                 <a class="profile-tab" href="{{ url_for('movie.index') }}">Descobrir</a>
                 <a class="profile-tab" href="{{ url_for('catalogo.catalogo') if current_user.is_authenticated else url_for('auth.login') }}">Catalogo</a>
+                <a class="profile-tab is-active" href="{{ url_for('users.directory') }}">Plateia</a>
                 {% if current_user.is_authenticated %}
                     <a class="profile-tab" href="{{ url_for('perfil.perfil') }}">Meu perfil</a>
                     <a class="profile-tab profile-tab--accent" href="{{ url_for('auth.logout') }}">sair</a>
@@ -99,6 +100,7 @@
                     <div class="hero-links">
                         <a class="hero-link hero-link--primary" href="#publicReviews">ver resenhas</a>
                         <a class="hero-link" href="#publicLists">ver listas</a>
+                        <a class="hero-link" href="{{ url_for('users.directory') }}">buscar outros plateia</a>
                         {% if current_user.is_authenticated and current_user.id == profile.id %}
                         <a class="hero-link" href="{{ url_for('perfil.perfil') }}">editar meu perfil</a>
                         {% endif %}
@@ -109,6 +111,19 @@
             <aside class="public-profile-note">
                 <span class="eyebrow">compartilhavel</span>
                 <p>Este perfil pode ser aberto por visitantes sem login e mostra apenas informacoes publicas.</p>
+                <form class="user-search-form user-search-form--stacked" method="GET" action="{{ url_for('users.directory') }}">
+                    <label for="public-user-search">Buscar outro usuario</label>
+                    <div class="user-search-form__row">
+                        <input
+                            id="public-user-search"
+                            type="text"
+                            name="search"
+                            minlength="2"
+                            placeholder="Digite outro nome"
+                            autocomplete="off">
+                        <button type="submit">buscar</button>
+                    </div>
+                </form>
             </aside>
         </section>
 
@@ -141,21 +156,33 @@
                 {% if profile.recentReviews %}
                 <div class="public-review-list">
                     {% for review in profile.recentReviews %}
-                    <article class="public-review-item">
+                    <article
+                        class="public-review-item public-review-item--interactive"
+                        tabindex="0"
+                        role="button"
+                        aria-label="Abrir detalhes de {{ review.movieTitle }}"
+                        data-public-movie-trigger
+                        data-movie-id="{{ review.movieId or '' }}"
+                        data-movie-title="{{ review.movieTitle or '' }}"
+                        data-source-label="Resenha publicada"
+                        data-rating="{{ review.rating }}"
+                        data-created-at-label="{{ review.createdAtLabel }}"
+                        data-review-content="{{ review.content }}">
                         {% if review.posterUrl %}
-                        <a class="public-review-poster" href="{{ review.movieUrl }}">
+                        <div class="public-review-poster" aria-hidden="true">
                             <img src="{{ review.posterUrl }}" alt="Poster de {{ review.movieTitle }}" loading="lazy">
-                        </a>
+                        </div>
                         {% endif %}
 
                         <div class="public-review-copy">
                             <div class="public-review-top">
-                                <a href="{{ review.movieUrl }}">{{ review.movieTitle }}</a>
+                                <strong>{{ review.movieTitle }}</strong>
                                 <span>{{ review.rating }}/5</span>
                             </div>
                             <p>{{ review.content }}</p>
                             <div class="public-review-footer">
-                                <a href="{{ url_for('users.public_profile', user_id=profile.id) }}">por {{ profile.displayName }}</a>
+                                <a href="{{ url_for('users.public_profile', user_id=profile.id) }}" data-skip-public-movie-trigger>por {{ profile.displayName }}</a>
+                                <span class="public-review-open-hint">clique para abrir a ficha</span>
                                 <span>{{ review.createdAtLabel }}</span>
                             </div>
                         </div>
@@ -178,10 +205,37 @@
                 {% if profile.lists %}
                 <div class="public-list-grid">
                     {% for list in profile.lists %}
-                    <a class="public-list-item" href="{{ list.url }}">
-                        <strong>{{ list.title }}</strong>
-                        <span>{{ list.movieCount }} filmes</span>
-                    </a>
+                    <article class="public-list-item">
+                        <div class="public-list-head">
+                            <strong>{{ list.title }}</strong>
+                            <span>{{ list.movieCount }} filmes</span>
+                        </div>
+                        <p>{{ list.description if list.description else "Wishlist criada para organizar filmes que esse usuario quer reunir em uma lista propria." }}</p>
+                        {% if list.movies %}
+                        <div class="public-wishlist-movie-list">
+                            {% for movie in list.movies %}
+                            <button
+                                type="button"
+                                class="public-wishlist-movie"
+                                data-public-movie-trigger
+                                data-movie-id="{{ movie.movieId or '' }}"
+                                data-movie-title="{{ movie.title or '' }}"
+                                data-source-label="Wishlist publica"
+                                data-created-at-label="{{ movie.addedAtLabel }}">
+                                {% if movie.posterUrl %}
+                                <img src="{{ movie.posterUrl }}" alt="Poster de {{ movie.title }}" loading="lazy">
+                                {% else %}
+                                <span class="public-wishlist-movie-poster-placeholder" aria-hidden="true">Poster</span>
+                                {% endif %}
+                                <span>{{ movie.title }}</span>
+                            </button>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <span class="public-wishlist-empty">Nenhum filme foi adicionado a esta lista ainda.</span>
+                        {% endif %}
+                        <small>Criada em {{ list.createdAtLabel }}</small>
+                    </article>
                     {% endfor %}
                 </div>
                 {% else %}
@@ -200,7 +254,16 @@
                 {% if profile.recentActivities %}
                 <div class="public-activity-list">
                     {% for activity in profile.recentActivities %}
-                    <a class="public-activity-item" href="{{ activity.targetUrl if activity.targetUrl else '#' }}">
+                    <a
+                        class="public-activity-item"
+                        href="{{ activity.targetUrl if activity.targetUrl else '#' }}"
+                        data-public-movie-trigger
+                        data-movie-id="{{ activity.movieId or '' }}"
+                        data-movie-title="{{ activity.movieTitle or '' }}"
+                        data-source-label="{{ activity.label }}"
+                        data-rating="{{ activity.rating or 0 }}"
+                        data-created-at-label="{{ activity.createdAtLabel }}"
+                        data-review-content="{{ activity.reviewContent or '' }}">
                         <span>{{ activity.label }}</span>
                         <strong>{{ activity.description }}</strong>
                         <small>{{ activity.createdAtLabel }}</small>
@@ -216,6 +279,25 @@
         </section>
         {% endif %}
     </main>
+
+    {% if state == "success" %}
+    <div class="review-modal public-detail-modal" id="publicMovieModal" hidden>
+        <div class="review-modal-backdrop" data-public-movie-close></div>
+        <div class="review-modal-card public-detail-modal-card">
+            <div class="review-modal-head">
+                <div>
+                    <span class="card-kicker">Filme</span>
+                    <h2 id="publicMovieModalTitle">Detalhes do filme</h2>
+                </div>
+                <button class="review-modal-close" type="button" data-public-movie-close>&times;</button>
+            </div>
+
+            <div id="publicMovieModalContent" class="public-detail-modal-content"></div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 
 </html>

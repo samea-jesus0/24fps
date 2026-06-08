@@ -8,7 +8,7 @@ import os
 load_dotenv()
 
 
-def ensure_user_avatar_columns():
+def ensure_user_profile_columns():
     from models.user import User
 
     inspector = inspect(db.engine)
@@ -22,17 +22,40 @@ def ensure_user_avatar_columns():
     quoted_table = preparer.quote(table_name)
 
     alter_statements = []
+    if "display_name" not in existing_columns:
+        alter_statements.append(f"ALTER TABLE {quoted_table} ADD COLUMN display_name VARCHAR(100) NULL")
+    if "bio" not in existing_columns:
+        alter_statements.append(f"ALTER TABLE {quoted_table} ADD COLUMN bio TEXT NULL")
     if "foto_pos_x" not in existing_columns:
         alter_statements.append(f"ALTER TABLE {quoted_table} ADD COLUMN foto_pos_x INTEGER NOT NULL DEFAULT 50")
     if "foto_pos_y" not in existing_columns:
         alter_statements.append(f"ALTER TABLE {quoted_table} ADD COLUMN foto_pos_y INTEGER NOT NULL DEFAULT 50")
-
-    if not alter_statements:
-        return
+    if "created_at" not in existing_columns:
+        alter_statements.append(f"ALTER TABLE {quoted_table} ADD COLUMN created_at DATETIME NULL")
 
     with db.engine.begin() as connection:
         for statement in alter_statements:
             connection.execute(text(statement))
+
+        connection.execute(
+            text(
+                f"""
+                UPDATE {quoted_table}
+                SET display_name = nome
+                WHERE (display_name IS NULL OR display_name = '')
+                  AND nome IS NOT NULL
+                """
+            )
+        )
+        connection.execute(
+            text(
+                f"""
+                UPDATE {quoted_table}
+                SET created_at = CURRENT_TIMESTAMP
+                WHERE created_at IS NULL
+                """
+            )
+        )
 
 
 def ensure_review_columns():
@@ -83,11 +106,13 @@ def create_app():
     from controller.auth_controller import auth
     from controller.catalogo_controller import catalogo_bp
     from controller.dashboard_controller import main
+    from controller.user_profile_controller import users_bp
     app.register_blueprint(movie_bp)
     app.register_blueprint(perfil_bp)
     app.register_blueprint(auth)
     app.register_blueprint(catalogo_bp)
     app.register_blueprint(main)
+    app.register_blueprint(users_bp)
     
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
@@ -103,9 +128,11 @@ def create_app():
         from models.user import User
         from models.pesquisa import Search
         from models.review import Review
+        from models.wishlist import Wishlist
+        from models.wishlist_movie import WishlistMovie
 
         db.create_all()
-        ensure_user_avatar_columns()
+        ensure_user_profile_columns()
         ensure_review_columns()
         
     return app

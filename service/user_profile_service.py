@@ -6,9 +6,11 @@ from sqlalchemy import func, or_
 from extensions import db
 from models.review import Review
 from models.user import User
+from service.wishlist_service import list_public_wishlists
 
 
 DEFAULT_AVATAR = "default-avatar.svg"
+USER_DIRECTORY_LIMIT = 12
 RECENT_REVIEWS_LIMIT = 6
 RECENT_ACTIVITIES_LIMIT = 8
 
@@ -31,6 +33,14 @@ def _movie_url(review):
     if not review.filme_titulo:
         return url_for("movie.index")
     return url_for("movie.index", filme=review.filme_titulo)
+
+
+def _username(user):
+    return (user.nome or f"usuario-{user.id}").strip()
+
+
+def _display_name(user):
+    return (user.display_name or user.nome or f"Usuario {user.id}").strip()
 
 
 def _isoformat(value):
@@ -58,7 +68,18 @@ def _review_payload(review):
     }
 
 
-def _activity_payload(kind, label, description, created_at, target_url=None):
+def _activity_payload(
+    kind,
+    label,
+    description,
+    created_at,
+    target_url=None,
+    movie_id=None,
+    movie_title=None,
+    poster_url=None,
+    review_content=None,
+    rating=None,
+):
     return {
         "type": kind,
         "label": label,
@@ -66,6 +87,11 @@ def _activity_payload(kind, label, description, created_at, target_url=None):
         "createdAt": _isoformat(created_at),
         "createdAtLabel": _date_label(created_at),
         "targetUrl": target_url,
+        "movieId": movie_id,
+        "movieTitle": movie_title,
+        "posterUrl": poster_url,
+        "reviewContent": review_content,
+        "rating": rating,
     }
 
 
@@ -83,6 +109,11 @@ def _build_recent_activities(reviews):
                 f"Publicou uma resenha de {movie_title}.",
                 review.created_at or review.updated_at,
                 target_url,
+                movie_id=review.filme_id,
+                movie_title=review.filme_titulo,
+                poster_url=review.poster_url,
+                review_content=review.conteudo,
+                rating=review.nota or 0,
             )
         )
 
@@ -94,6 +125,11 @@ def _build_recent_activities(reviews):
                     f"Avaliou {movie_title} com {review.nota}/5.",
                     review.created_at or review.updated_at,
                     target_url,
+                    movie_id=review.filme_id,
+                    movie_title=review.filme_titulo,
+                    poster_url=review.poster_url,
+                    review_content=review.conteudo,
+                    rating=review.nota or 0,
                 )
             )
 
@@ -114,9 +150,42 @@ def _count_reviewed_movies(user_id):
 
 
 def _load_public_lists(user_id):
-    # O projeto atual ainda nao possui modelo de listas/watchlist no codigo.
-    # Mantemos a chave no DTO para preservar o contrato do F07.
-    return []
+    return list_public_wishlists(user_id)
+
+
+def _public_user_card_payload(user, external_urls=False):
+    return {
+        "id": user.id,
+        "username": _username(user),
+        "displayName": _display_name(user),
+        "bio": user.bio or "",
+        "avatarUrl": _avatar_url(user, external=external_urls),
+        "avatarPosition": {
+            "x": user.foto_pos_x or 50,
+            "y": user.foto_pos_y or 50,
+        },
+        "createdAt": _isoformat(user.created_at),
+        "createdAtLabel": _date_label(user.created_at),
+        "profileUrl": url_for("users.public_profile", user_id=user.id),
+    }
+
+
+def _public_users_query(exclude_user_id=None):
+    query = User.query
+    if exclude_user_id is not None:
+        query = query.filter(User.id != exclude_user_id)
+    return query
+
+
+def list_public_users(limit=USER_DIRECTORY_LIMIT, exclude_user_id=None, external_urls=False):
+    users = (
+        _public_users_query(exclude_user_id=exclude_user_id)
+        .order_by(User.created_at.desc(), User.nome.asc())
+        .limit(limit)
+        .all()
+    )
+
+    return [_public_user_card_payload(user, external_urls=external_urls) for user in users]
 
 
 def get_public_user_profile(user_id, external_urls=False):
@@ -135,8 +204,8 @@ def get_public_user_profile(user_id, external_urls=False):
 
     return {
         "id": user.id,
-        "username": user.nome or f"usuario-{user.id}",
-        "displayName": user.display_name or user.nome or f"Usuario {user.id}",
+        "username": _username(user),
+        "displayName": _display_name(user),
         "bio": user.bio or "",
         "avatarUrl": _avatar_url(user, external=external_urls),
         "avatarPosition": {
@@ -157,31 +226,22 @@ def get_public_user_profile(user_id, external_urls=False):
     }
 
 
-def search_public_users(query, limit=8):
+def search_public_users(query, limit=USER_DIRECTORY_LIMIT, exclude_user_id=None, external_urls=False):
     query = (query or "").strip()
     if len(query) < 2:
         return []
 
     users = (
-        User.query.filter(
+        _public_users_query(exclude_user_id=exclude_user_id)
+        .filter(
             or_(
                 User.nome.ilike(f"%{query}%"),
                 User.display_name.ilike(f"%{query}%"),
             )
         )
-        .order_by(User.nome.asc())
+        .order_by(func.coalesce(User.display_name, User.nome).asc(), User.nome.asc())
         .limit(limit)
         .all()
     )
 
-    return [
-        {
-            "id": user.id,
-            "username": user.nome or f"usuario-{user.id}",
-            "displayName": user.display_name or user.nome or f"Usuario {user.id}",
-            "bio": user.bio or "",
-            "avatarUrl": _avatar_url(user),
-            "profileUrl": url_for("users.public_profile", user_id=user.id),
-        }
-        for user in users
-    ]
+    return [_public_user_card_payload(user, external_urls=external_urls) for user in users]

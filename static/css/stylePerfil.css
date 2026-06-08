@@ -490,7 +490,609 @@ p {
     gap: 8px;
 }
 
-.profile-reviews {
+.user-search-form {
+    display: grid;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+.user-search-form label {
+    font-weight: 800;
+    color: var(--ink);
+}
+
+.user-search-form__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+}
+
+.user-search-form input {
+    width: 100%;
+    min-height: 56px;
+    padding: 14px 16px;
+    border-radius: 18px;
+    border: 2px solid rgba(96, 118, 69, 0.16);
+    background: rgba(255, 255, 255, 0.88);
+    color: var(--ink);
+    font: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.user-search-form input:focus {
+    outline: none;
+    border-color: rgba(96, 118, 69, 0.45);
+    box-shadow: 0 0 0 4px rgba(137, 163, 77, 0.12);
+}
+
+.user-search-form button {
+    min-height: 56px;
+    padding: 0 20px;
+    border: none;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #cb7364 0%, #b95f52 100%);
+    color: #fff8eb;
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 16px 28px rgba(185, 95, 82, 0.22);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.user-search-form button:hover {
+    transform: translateY(-2px);
+}
+
+.hero-notes p,
+.public-profile-note p,
+.directory-results-head p,
+.public-state-card p,
+.public-profile-copy p {
+    margin-top: 14px;
+}
+
+.public-state-card,
+.public-profile-header,
+.public-profile-note,
+.public-section,
+.directory-results {
+    border-radius: 28px;
+    border: 2px solid rgba(201, 109, 95, 0.18);
+}
+
+.public-state-card,
+.public-section,
+.directory-results {
+    background:
+        linear-gradient(180deg, rgba(255, 252, 243, 0.98), rgba(255, 245, 221, 0.98));
+}
+
+.public-profile-hero,
+.public-stats-grid,
+.public-profile-content {
+    display: grid;
+    gap: 18px;
+    padding: 0 24px 24px;
+}
+
+.public-profile-hero {
+    grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+}
+
+.public-profile-header,
+.public-profile-note,
+.public-state-card {
+    padding: clamp(22px, 4vw, 32px);
+}
+
+.public-profile-header {
+    display: grid;
+    grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
+    gap: 22px;
+    align-items: center;
+    background:
+        linear-gradient(180deg, rgba(255, 252, 243, 0.98), rgba(255, 245, 221, 0.98));
+}
+
+.public-profile-note {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    background:
+        linear-gradient(180deg, rgba(255, 251, 239, 0.98), rgba(236, 245, 212, 0.92)),
+        repeating-linear-gradient(
+            90deg,
+            rgba(137, 163, 77, 0.08) 0 18px,
+            transparent 18px 36px
+        );
+}
+
+.public-avatar-frame {
+    width: min(100%, 220px);
+    aspect-ratio: 1 / 1;
+    padding: 14px;
+    border-radius: 36px;
+    background:
+        radial-gradient(circle at top left, rgba(255, 233, 167, 0.84), transparent 28%),
+        linear-gradient(180deg, rgba(255, 249, 228, 0.98), rgba(244, 228, 176, 0.96));
+    border: 3px dashed rgba(201, 109, 95, 0.24);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+}
+
+.public-avatar-frame img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 28px;
+    object-fit: cover;
+    border: 3px solid rgba(96, 118, 69, 0.18);
+    background: rgba(255, 255, 255, 0.78);
+}
+
+.public-profile-copy {
+    display: grid;
+    gap: 8px;
+    align-content: start;
+}
+
+.public-username {
+    color: var(--olive-dark);
+    font-weight: 800;
+}
+
+.public-bio {
+    max-width: 60ch;
+}
+
+.public-profile-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.public-profile-meta span,
+.directory-count,
+.directory-user-kicker {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(137, 163, 77, 0.12);
+    color: var(--olive-dark);
+    font-weight: 800;
+}
+
+.public-state-card {
+    margin: 24px;
+    display: grid;
+    justify-items: center;
+    text-align: center;
+    gap: 8px;
+}
+
+.public-stats-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.public-stat-card {
+    display: grid;
+    gap: 6px;
+    padding: 22px;
+    border-radius: 24px;
+    border: 1px solid rgba(96, 118, 69, 0.12);
+    background: rgba(255, 255, 255, 0.82);
+    text-align: center;
+}
+
+.public-stat-card strong {
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    font-family: "Averia Serif Libre", "Georgia", serif;
+}
+
+.public-profile-content {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.public-section {
+    padding: clamp(22px, 4vw, 32px);
+}
+
+.public-section--activity {
+    grid-column: 1 / -1;
+}
+
+.public-review-list,
+.public-list-grid,
+.public-activity-list {
+    display: grid;
+    gap: 16px;
+    margin-top: 18px;
+}
+
+.public-review-item {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 16px;
+    padding: 18px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(96, 118, 69, 0.12);
+}
+
+.public-review-item--interactive {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.public-review-item--interactive:hover,
+.public-review-item--interactive:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 30px rgba(90, 73, 44, 0.12);
+}
+
+.public-review-item--interactive:focus-visible {
+    outline: 3px solid rgba(137, 163, 77, 0.36);
+    outline-offset: 3px;
+}
+
+.public-review-poster {
+    display: block;
+    width: 96px;
+    height: 140px;
+    border-radius: 18px;
+    overflow: hidden;
+    background: rgba(236, 245, 212, 0.52);
+}
+
+.public-review-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.public-review-copy {
+    display: grid;
+    gap: 12px;
+    min-width: 0;
+}
+
+.public-review-top,
+.public-review-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.public-review-top a,
+.public-review-footer a,
+.public-list-item,
+.public-activity-item,
+.directory-user-card {
+    color: inherit;
+    text-decoration: none;
+}
+
+.public-review-top a,
+.public-review-top strong {
+    font-family: "Averia Serif Libre", "Georgia", serif;
+    font-size: 1.2rem;
+}
+
+.public-review-top strong {
+    color: var(--ink);
+}
+
+.public-review-open-hint {
+    color: var(--olive-dark);
+    font-weight: 800;
+}
+
+.public-list-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.public-list-item,
+.public-activity-item {
+    display: grid;
+    gap: 8px;
+    padding: 18px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.84);
+    border: 1px solid rgba(96, 118, 69, 0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.public-list-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.public-list-head strong {
+    font-family: "Averia Serif Libre", "Georgia", serif;
+    font-size: 1.2rem;
+    color: var(--ink);
+}
+
+.public-list-head span {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(137, 163, 77, 0.12);
+    color: var(--olive-dark);
+    font-weight: 800;
+}
+
+.public-list-item small {
+    color: var(--muted);
+}
+
+.public-wishlist-movie-list {
+    display: grid;
+    gap: 10px;
+}
+
+.public-wishlist-movie {
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.88);
+    color: var(--ink);
+    text-align: left;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.public-wishlist-movie:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 18px rgba(90, 73, 44, 0.1);
+}
+
+.public-wishlist-movie img {
+    width: 46px;
+    height: 68px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+.public-wishlist-movie-poster-placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 68px;
+    border-radius: 12px;
+    background: rgba(201, 109, 95, 0.12);
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.public-wishlist-movie span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-weight: 800;
+}
+
+.public-wishlist-empty {
+    color: var(--muted);
+    font-size: 0.96rem;
+}
+
+.public-list-item:hover,
+.public-activity-item:hover,
+.directory-user-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 30px rgba(90, 73, 44, 0.12);
+}
+
+.public-activity-item small {
+    color: var(--muted);
+}
+
+.public-detail-modal-card {
+    width: min(920px, 100%);
+}
+
+.public-detail-modal-content {
+    margin-top: 22px;
+}
+
+.public-detail-state {
+    display: grid;
+    gap: 10px;
+    padding: 24px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(96, 118, 69, 0.12);
+}
+
+.public-detail-state h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-family: "Averia Serif Libre", "Georgia", serif;
+}
+
+.public-detail-layout {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.public-detail-poster-shell {
+    border-radius: 28px;
+    padding: 14px;
+    background:
+        radial-gradient(circle at top left, rgba(255, 233, 167, 0.84), transparent 28%),
+        linear-gradient(180deg, rgba(255, 249, 228, 0.98), rgba(244, 228, 176, 0.96));
+    border: 3px dashed rgba(201, 109, 95, 0.24);
+}
+
+.public-detail-poster-shell img,
+.public-detail-poster-placeholder {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    border-radius: 20px;
+    display: grid;
+    place-items: center;
+    object-fit: cover;
+    background: rgba(255, 255, 255, 0.78);
+    border: 2px solid rgba(96, 118, 69, 0.18);
+}
+
+.public-detail-copy {
+    display: grid;
+    gap: 14px;
+}
+
+.public-detail-copy h3 {
+    margin: 0;
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-family: "Averia Serif Libre", "Georgia", serif;
+}
+
+.public-detail-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.public-detail-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(137, 163, 77, 0.12);
+    color: var(--olive-dark);
+    font-weight: 800;
+}
+
+.public-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.public-detail-item,
+.public-detail-synopsis,
+.public-detail-review-note {
+    padding: 16px 18px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.84);
+    border: 1px solid rgba(96, 118, 69, 0.10);
+}
+
+.public-detail-item {
+    display: grid;
+    gap: 6px;
+}
+
+.public-detail-synopsis,
+.public-detail-review-note {
+    display: grid;
+    gap: 10px;
+}
+
+.public-empty-state {
+    margin-top: 18px;
+    padding: 24px;
+    border-radius: 24px;
+    border: 1px dashed rgba(96, 118, 69, 0.18);
+    background: rgba(255, 255, 255, 0.7);
+    text-align: center;
+}
+
+.directory-results {
+    display: grid;
+    gap: 22px;
+    padding: 24px;
+    margin: 0 24px 24px;
+}
+
+.directory-results-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+.directory-user-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+}
+
+.directory-user-card {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 16px;
+    padding: 20px;
+    border-radius: 24px;
+    border: 1px solid rgba(96, 118, 69, 0.12);
+    background: rgba(255, 255, 255, 0.88);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.directory-user-avatar {
+    width: 88px;
+    height: 88px;
+    padding: 8px;
+    border-radius: 26px;
+    background:
+        radial-gradient(circle at top left, rgba(255, 233, 167, 0.84), transparent 28%),
+        linear-gradient(180deg, rgba(255, 249, 228, 0.98), rgba(244, 228, 176, 0.96));
+    border: 2px dashed rgba(201, 109, 95, 0.24);
+}
+
+.directory-user-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 18px;
+    object-fit: cover;
+    border: 2px solid rgba(96, 118, 69, 0.18);
+}
+
+.directory-user-copy {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+}
+
+.directory-user-copy h3 {
+    margin: 0;
+    font-size: 1.45rem;
+    font-family: "Averia Serif Libre", "Georgia", serif;
+}
+
+.directory-user-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+    color: var(--olive-dark);
+    font-weight: 800;
+}
+
+.directory-user-link::after {
+    content: ">";
+    font-size: 1rem;
+}
+
+.profile-reviews,
+.profile-wishlists {
     display: grid;
     gap: 22px;
     padding: 32px;
@@ -507,6 +1109,10 @@ p {
     justify-content: space-between;
     gap: 20px;
     flex-wrap: wrap;
+}
+
+.review-header > div {
+    min-width: 0;
 }
 
 .review-header h2 {
@@ -537,22 +1143,38 @@ p {
     display: grid;
 }
 
+.review-slide-layout {
+    display: grid;
+    gap: 20px;
+    align-items: start;
+}
+
+.review-slide--with-poster .review-slide-layout {
+    grid-template-columns: minmax(120px, 140px) minmax(0, 1fr);
+}
+
+.review-slide--no-poster .review-slide-layout {
+    grid-template-columns: minmax(0, 1fr);
+}
+
 .review-slide-copy {
     display: grid;
     gap: 18px;
+    min-width: 0;
 }
 
 .review-poster {
     display: flex;
     justify-content: center;
-    margin-bottom: 10px;
+    margin-bottom: 0;
 }
 
 .review-poster img {
-    max-width: 120px;
-    max-height: 180px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 140px;
+    aspect-ratio: 2 / 3;
+    border-radius: 18px;
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
     object-fit: cover;
 }
 
@@ -573,19 +1195,20 @@ p {
     background: rgba(137, 163, 77, 0.12);
     color: var(--olive-dark);
     font-weight: 800;
+    max-width: 100%;
 }
 
 .review-rating {
     background: rgba(236, 200, 92, 0.18);
+    white-space: nowrap;
 }
 
 .review-slide-text {
     margin: 0;
     color: var(--muted);
     line-height: 1.85;
-    max-height: 260px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
 }
 
 .review-slide-footer {
@@ -599,6 +1222,11 @@ p {
 .review-date {
     color: var(--muted);
     font-size: 0.96rem;
+}
+
+.review-film {
+    overflow-wrap: anywhere;
+    line-height: 1.45;
 }
 
 .review-edit-button,
@@ -651,16 +1279,265 @@ p {
     color: var(--muted);
 }
 
+.wishlist-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+}
+
+.wishlist-card {
+    display: grid;
+    gap: 14px;
+    padding: 22px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(96, 118, 69, 0.12);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.wishlist-card h3 {
+    margin: 0;
+    font-size: 1.55rem;
+    font-family: "Averia Serif Libre", "Georgia", serif;
+}
+
+.wishlist-card-head,
+.wishlist-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.wishlist-visibility {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(137, 163, 77, 0.12);
+    color: var(--olive-dark);
+    font-weight: 800;
+}
+
+.wishlist-meta span {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(201, 109, 95, 0.10);
+    color: #965145;
+    font-weight: 800;
+}
+
+.wishlist-card-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.wishlist-action-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 18px;
+    border: none;
+    border-radius: 999px;
+    background: rgba(96, 118, 69, 0.14);
+    color: var(--olive-dark);
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.wishlist-action-button:hover {
+    transform: translateY(-1px);
+    background: rgba(96, 118, 69, 0.2);
+}
+
+.wishlist-action-button--ghost {
+    background: rgba(255, 255, 255, 0.84);
+    color: var(--ink);
+    border: 1px solid rgba(96, 118, 69, 0.16);
+}
+
+.wishlist-action-button--ghost:hover {
+    background: rgba(255, 255, 255, 0.96);
+}
+
+.wishlist-action-button--danger {
+    background: rgba(201, 109, 95, 0.12);
+    color: #965145;
+}
+
+.wishlist-action-button--danger:hover {
+    background: rgba(201, 109, 95, 0.18);
+}
+
+.wishlist-movie-list {
+    display: grid;
+    gap: 16px;
+}
+
+.wishlist-movie-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.wishlist-movie-item {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 10px;
+    padding: 12px 12px 14px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.84);
+    border: 1px solid rgba(96, 118, 69, 0.1);
+    min-width: 0;
+}
+
+.wishlist-movie-poster {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 2 / 3;
+    border-radius: 14px;
+    overflow: hidden;
+    background: rgba(201, 109, 95, 0.12);
+}
+
+.wishlist-movie-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.wishlist-movie-poster span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: var(--muted);
+    font-size: 0.76rem;
+    font-weight: 800;
+}
+
+.wishlist-movie-copy {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.wishlist-movie-copy strong {
+    color: var(--ink);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-height: 1.35;
+    min-height: calc(1.35em * 2);
+}
+
+.wishlist-movie-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 999px;
+    background: rgba(201, 109, 95, 0.12);
+    color: #965145;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.wishlist-movie-remove:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.wishlist-movies-empty {
+    margin: 0;
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.84);
+    border: 1px dashed rgba(96, 118, 69, 0.18);
+    color: var(--muted);
+}
+
+.wishlist-movie-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.wishlist-page-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 999px;
+    background: rgba(96, 118, 69, 0.14);
+    color: var(--olive-dark);
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.wishlist-page-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.wishlist-page-indicator {
+    color: var(--muted);
+    font-weight: 800;
+}
+
+.wishlist-empty {
+    grid-column: 1 / -1;
+}
+
+.wishlist-visibility-field {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.86);
+    border: 2px solid rgba(96, 118, 69, 0.16);
+    cursor: pointer;
+}
+
+.wishlist-visibility-field input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--tomato);
+}
+
+.wishlist-visibility-field span {
+    color: var(--ink);
+    font-weight: 800;
+}
+
 .review-modal {
     position: fixed;
     inset: 0;
     display: grid;
-    align-items: start;
+    align-items: center;
     justify-items: center;
     overflow-y: auto;
-    padding: 32px 16px;
+    padding: 24px 16px;
     background: rgba(0, 0, 0, 0.32);
-    z-index: 1000;
+    z-index: 2200;
     -webkit-overflow-scrolling: touch;
 }
 
@@ -676,16 +1553,20 @@ p {
 
 .review-modal-card {
     position: relative;
-    width: min(640px, 100%);
-    max-height: calc(100vh - 72px);
+    width: min(680px, calc(100vw - 32px));
+    max-height: calc(100vh - 48px);
     overflow-y: auto;
     padding: 28px;
-    margin: 24px 0;
+    margin: 0;
     border-radius: 28px;
     background: var(--paper);
     border: 2px solid rgba(96, 118, 69, 0.12);
     box-shadow: var(--shadow);
     z-index: 1;
+}
+
+.review-modal--wide .review-modal-card {
+    width: min(760px, calc(100vw - 32px));
 }
 
 .review-modal-head {
@@ -699,7 +1580,6 @@ p {
     .review-modal-card {
         width: calc(100vw - 24px);
         max-height: calc(100vh - 40px);
-        margin: 16px 0;
         padding: 20px;
         border-radius: 22px;
     }
@@ -849,6 +1729,18 @@ p {
     font-weight: 800;
 }
 
+.toast--runtime {
+    pointer-events: none;
+}
+
+.toast--success {
+    background: linear-gradient(180deg, #88a94a 0%, #6e8a39 100%);
+}
+
+.toast--error {
+    background: linear-gradient(180deg, #cb7364 0%, #b85b51 100%);
+}
+
 .toast.show {
     opacity: 1;
     transform: translateY(0);
@@ -940,6 +1832,34 @@ p {
         grid-template-columns: 1fr;
     }
 
+    .wishlist-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .wishlist-movie-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .public-profile-hero,
+    .public-profile-content {
+        grid-template-columns: 1fr;
+    }
+
+    .public-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .public-profile-header {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+    }
+
+    .public-detail-layout,
+    .public-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
     .journal-card {
         grid-column: auto;
     }
@@ -958,7 +1878,12 @@ p {
 
     .profile-topbar,
     .profile-hero,
-    .profile-grid {
+    .profile-grid,
+    .profile-reviews,
+    .profile-wishlists,
+    .public-profile-hero,
+    .public-stats-grid,
+    .public-profile-content {
         padding-left: 16px;
         padding-right: 16px;
     }
@@ -973,5 +1898,114 @@ p {
 
     .profile-tab {
         flex: 1;
+    }
+
+    .directory-results {
+        margin-left: 16px;
+        margin-right: 16px;
+        padding: 20px 16px;
+    }
+
+    .user-search-form__row,
+    .public-review-item,
+    .directory-user-card,
+    .public-detail-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .review-slide-layout,
+    .wishlist-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .wishlist-movie-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .review-header .hero-link,
+    .review-pagination .review-nav {
+        width: 100%;
+    }
+
+    .review-slide {
+        padding: 20px 18px;
+    }
+
+    .review-poster {
+        justify-content: flex-start;
+    }
+
+    .review-poster img {
+        max-width: 128px;
+    }
+
+    .review-slide-top,
+    .review-slide-footer,
+    .wishlist-card-head,
+    .wishlist-meta {
+        align-items: stretch;
+    }
+
+    .review-film,
+    .review-rating,
+    .wishlist-meta span,
+    .wishlist-visibility {
+        justify-content: center;
+    }
+
+    .wishlist-card {
+        padding: 20px 18px;
+    }
+
+    .wishlist-card-actions,
+    .public-list-head {
+        align-items: stretch;
+    }
+
+    .wishlist-action-button,
+    .wishlist-movie-remove {
+        width: 100%;
+    }
+
+    .wishlist-page-button {
+        min-width: 0;
+    }
+
+    .wishlist-visibility-field {
+        align-items: flex-start;
+    }
+
+    .public-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .public-review-poster,
+    .directory-user-avatar {
+        width: min(120px, 100%);
+        height: auto;
+        aspect-ratio: 2 / 3;
+    }
+
+    .directory-user-avatar {
+        aspect-ratio: 1 / 1;
+    }
+}
+
+@media (max-width: 520px) {
+    .wishlist-movie-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .wishlist-movie-pagination {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .wishlist-page-button {
+        width: 100%;
+    }
+
+    .wishlist-page-indicator {
+        text-align: center;
     }
 }

@@ -66,6 +66,7 @@ def register():
 
         user = User(
             nome=nome,
+            display_name=nome,
             email=email,
             senha=senha,
             foto=foto_nome,

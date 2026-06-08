@@ -4,7 +4,7 @@ from extensions import db
 
 
 def register_user(nome, email, senha, foto):
-    # verifica se já existe
+
     if User.query.filter_by(email=email).first():
         return None, "Email já cadastrado"
 
@@ -12,6 +12,7 @@ def register_user(nome, email, senha, foto):
 
     user = User(
         nome=nome,
+        display_name=nome,
         email=email,
         senha=senha_hash,
         foto=foto

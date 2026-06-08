@@ -5,6 +5,14 @@ from extensions import db
 from models.pesquisa import Search
 from models.review import Review
 from service.filme_service import buscar_filme_por_nome
+from service.wishlist_service import (
+    add_movie_to_wishlist,
+    create_wishlist as create_wishlist_service,
+    delete_wishlist as delete_wishlist_service,
+    list_user_wishlists,
+    remove_movie_from_wishlist,
+    update_wishlist as update_wishlist_service,
+)
 from flask_login import login_required, current_user
 
 perfil_bp = Blueprint("perfil", __name__)
@@ -31,7 +39,8 @@ def perfil():
         .order_by(Review.updated_at.desc(), Review.created_at.desc())
         .all()
     )
-    return render_template("perfil.html", user=current_user, reviews=reviews)
+    wishlists = list_user_wishlists(current_user.id)
+    return render_template("perfil.html", user=current_user, reviews=reviews, wishlists=wishlists)
 
 
 @perfil_bp.route('/perfil/reviews', methods=['POST'])
@@ -139,3 +148,112 @@ def delete_review(review_id):
     db.session.delete(review)
     db.session.commit()
     return jsonify({"success": True})
+
+
+@perfil_bp.route('/perfil/wishlists', methods=['GET'])
+@login_required
+def get_wishlists():
+    return jsonify({"wishlists": list_user_wishlists(current_user.id)})
+
+
+@perfil_bp.route('/perfil/wishlists', methods=['POST'])
+@login_required
+def create_wishlist():
+    data = request.get_json(silent=True) or request.form or {}
+    title = data.get("title") or data.get("titulo")
+    description = data.get("description") or data.get("descricao") or ""
+    raw_is_public = data.get("is_public", True)
+
+    if isinstance(raw_is_public, str):
+        is_public = raw_is_public.strip().lower() not in {"false", "0", "off", "nao", "não"}
+    else:
+        is_public = bool(raw_is_public)
+
+    wishlist, error = create_wishlist_service(
+        current_user.id,
+        title=title,
+        description=description,
+        is_public=is_public,
+    )
+
+    if error:
+        return jsonify({"erro": error}), 400
+
+    return jsonify(wishlist), 201
+
+
+@perfil_bp.route('/perfil/wishlists/<int:wishlist_id>/movies', methods=['POST'])
+@login_required
+def add_movie(wishlist_id):
+    data = request.get_json(silent=True) or request.form or {}
+    title = data.get("title") or data.get("movie_title") or data.get("filme_titulo")
+    movie_id = data.get("movie_id") or data.get("filme_id")
+    poster_url = data.get("poster_url")
+
+    wishlist, error = add_movie_to_wishlist(
+        current_user.id,
+        wishlist_id=wishlist_id,
+        title=title,
+        movie_id=movie_id,
+        poster_url=poster_url,
+    )
+
+    if error:
+        status_code = 409 if "ja esta" in error else 400
+        return jsonify({"erro": error}), status_code
+
+    return jsonify(wishlist), 201
+
+
+@perfil_bp.route('/perfil/wishlists/<int:wishlist_id>', methods=['PUT'])
+@login_required
+def update_wishlist(wishlist_id):
+    data = request.get_json(silent=True) or request.form or {}
+    title = data.get("title") or data.get("titulo")
+    description = data.get("description") or data.get("descricao") or ""
+    raw_is_public = data.get("is_public", True)
+
+    if isinstance(raw_is_public, str):
+        is_public = raw_is_public.strip().lower() not in {"false", "0", "off", "nao", "não"}
+    else:
+        is_public = bool(raw_is_public)
+
+    wishlist, error = update_wishlist_service(
+        current_user.id,
+        wishlist_id=wishlist_id,
+        title=title,
+        description=description,
+        is_public=is_public,
+    )
+
+    if error:
+        status_code = 404 if "nao encontrada" in error else 400
+        return jsonify({"erro": error}), status_code
+
+    return jsonify(wishlist)
+
+
+@perfil_bp.route('/perfil/wishlists/<int:wishlist_id>', methods=['DELETE'])
+@login_required
+def delete_wishlist(wishlist_id):
+    error = delete_wishlist_service(current_user.id, wishlist_id=wishlist_id)
+    if error:
+        return jsonify({"erro": error}), 404
+
+    return jsonify({"success": True, "wishlistId": wishlist_id})
+
+
+@perfil_bp.route('/perfil/wishlists/<int:wishlist_id>/movies/<int:wishlist_movie_id>', methods=['DELETE'])
+@login_required
+def delete_wishlist_movie(wishlist_id, wishlist_movie_id):
+    wishlist, error = remove_movie_from_wishlist(
+        current_user.id,
+        wishlist_id=wishlist_id,
+        wishlist_movie_id=wishlist_movie_id,
+    )
+
+    if error:
+        status_code = 404 if "nao encontrada" in error or "nao encontrado" in error else 400
+        return jsonify({"erro": error}), status_code
+
+    return jsonify(wishlist)

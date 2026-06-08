@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, render_template, request
+from flask_login import current_user
 
-from service.user_profile_service import get_public_user_profile, search_public_users
+from service.user_profile_service import get_public_user_profile, list_public_users, search_public_users
 
 
 users_bp = Blueprint("users", __name__)
@@ -32,6 +33,45 @@ def _profile_not_found_response(wants_json):
             },
         ),
         404,
+    )
+
+
+@users_bp.route("/users")
+def directory():
+    wants_json = _wants_json_response()
+    query = (request.args.get("search") or request.args.get("q") or "").strip()
+    exclude_user_id = current_user.id if current_user.is_authenticated else None
+
+    if query:
+        users = search_public_users(query, exclude_user_id=exclude_user_id, external_urls=not wants_json)
+    else:
+        users = list_public_users(exclude_user_id=exclude_user_id, external_urls=not wants_json)
+
+    if wants_json:
+        return jsonify(
+            {
+                "query": query,
+                "queryTooShort": 0 < len(query) < 2,
+                "users": users,
+            }
+        )
+
+    title = "Perfis | 24FPS"
+    description = "Pesquise outros usuarios do 24FPS e abra perfis publicos."
+    if query:
+        title = f'Perfis para "{query}" | 24FPS'
+        description = f'Resultados da busca por "{query}" no 24FPS.'
+
+    return render_template(
+        "user_directory.html",
+        query=query,
+        query_too_short=0 < len(query) < 2,
+        users=users,
+        meta={
+            "title": title,
+            "description": description,
+            "image": None,
+        },
     )
 
 
@@ -68,5 +108,18 @@ def public_profile_api(user_id):
 
 @users_bp.route("/api/users")
 def users_search_api():
-    users = search_public_users(request.args.get("search") or request.args.get("q"))
-    return jsonify({"users": users})
+    query = (request.args.get("search") or request.args.get("q") or "").strip()
+    exclude_user_id = current_user.id if current_user.is_authenticated else None
+
+    if query:
+        users = search_public_users(query, exclude_user_id=exclude_user_id)
+    else:
+        users = list_public_users(exclude_user_id=exclude_user_id)
+
+    return jsonify(
+        {
+            "query": query,
+            "queryTooShort": 0 < len(query) < 2,
+            "users": users,
+        }
+    )

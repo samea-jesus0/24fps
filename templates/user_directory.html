@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ meta.title }}</title>
+    <meta name="description" content="{{ meta.description }}">
+    <meta property="og:title" content="{{ meta.title }}">
+    <meta property="og:description" content="{{ meta.description }}">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stylePerfil.css') }}">
+</head>
+
+<body class="profile-page public-profile-page">
+    <div class="page-noise" aria-hidden="true"></div>
+
+    <main class="profile-shell public-profile-shell">
+        <header class="profile-topbar">
+            <div class="profile-dots" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <div class="profile-address">https://24fps.cinema/users</div>
+
+            <nav class="profile-nav">
+                <a class="profile-tab" href="{{ url_for('movie.index') }}">Descobrir</a>
+                <a class="profile-tab" href="{{ url_for('catalogo.catalogo') if current_user.is_authenticated else url_for('auth.login') }}">Catalogo</a>
+                <a class="profile-tab is-active" href="{{ url_for('users.directory') }}">Plateia</a>
+                {% if current_user.is_authenticated %}
+                <a class="profile-tab" href="{{ url_for('perfil.perfil') }}">Meu perfil</a>
+                <a class="profile-tab profile-tab--accent" href="{{ url_for('auth.logout') }}">sair</a>
+                {% else %}
+                <a class="profile-tab" href="{{ url_for('auth.login') }}">login</a>
+                <a class="profile-tab profile-tab--accent" href="{{ url_for('auth.register') }}">cadastro</a>
+                {% endif %}
+            </nav>
+        </header>
+
+        <section class="profile-hero">
+            <article class="hero-copy reveal">
+                <span class="eyebrow">Plateia</span>
+                <h1>Encontre outras pessoas dentro do 24FPS.</h1>
+                <p>Pesquise pelo nome, abra o perfil publico e continue navegando entre usuarios com um clique.</p>
+
+                <form class="user-search-form" method="GET" action="{{ url_for('users.directory') }}">
+                    <label for="directory-search">Nome do usuario</label>
+                    <div class="user-search-form__row">
+                        <input
+                            id="directory-search"
+                            type="text"
+                            name="search"
+                            value="{{ query }}"
+                            minlength="2"
+                            placeholder="Ex.: Ana, Joao, Maria Clara"
+                            autocomplete="off">
+                        <button type="submit">buscar Plateia</button>
+                    </div>
+                </form>
+            </article>
+
+            <aside class="hero-notes reveal reveal-delay-1">
+                <span class="eyebrow">Como usar</span>
+                <ul class="note-list">
+                    <li>Digite ao menos 2 letras para receber resultados mais precisos.</li>
+                    <li>Cada card leva direto para o perfil publico do usuario escolhido.</li>
+                    <li>Se voce estiver logado, sua propria conta fica fora da busca para focar nos outros Plateia.</li>
+                </ul>
+            </aside>
+        </section>
+
+        <section class="directory-results reveal reveal-delay-2">
+            <div class="directory-results-head">
+                <div>
+                    <span class="eyebrow">
+                        {% if query %}
+                        resultados
+                        {% else %}
+                        explorar
+                        {% endif %}
+                    </span>
+                    <h2>
+                        {% if query %}
+                        Plateia encontrados para "{{ query }}"
+                        {% else %}
+                        Plateia para descobrir agora
+                        {% endif %}
+                    </h2>
+                    <p>
+                        {% if query %}
+                        Escolha um perfil abaixo para abrir a pagina publica desse usuario.
+                        {% else %}
+                        Estes Plateia ficam disponiveis para visita. Use a busca acima para filtrar por nome.
+                        {% endif %}
+                    </p>
+                </div>
+
+                {% if users %}
+                <span class="directory-count">{{ users|length }} {% if users|length == 1 %}perfil{% else %}Plateia{% endif %}</span>
+                {% endif %}
+            </div>
+
+            {% if query_too_short %}
+            <div class="public-empty-state">
+                <p>Digite pelo menos 2 caracteres para pesquisar usuarios pelo nome.</p>
+            </div>
+            {% elif users %}
+            <div class="directory-user-grid">
+                {% for user in users %}
+                <a class="directory-user-card" href="{{ user.profileUrl }}">
+                    <div class="directory-user-avatar">
+                        <img
+                            src="{{ user.avatarUrl }}"
+                            alt="Foto de perfil de {{ user.displayName }}"
+                            style="object-position: {{ user.avatarPosition.x }}% {{ user.avatarPosition.y }}%;">
+                    </div>
+
+                    <div class="directory-user-copy">
+                        <span class="directory-user-kicker">Perfil publico</span>
+                        <h3>{{ user.displayName }}</h3>
+                        {% if user.username and user.username != user.displayName %}
+                        <p class="public-username">{{ user.username }}</p>
+                        {% endif %}
+                        <p>{{ user.bio if user.bio else "Este usuario ainda nao adicionou uma biografia publica." }}</p>
+                        <span class="directory-user-link">abrir perfil</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="public-empty-state">
+                {% if query %}
+                <p>Nenhum perfil foi encontrado para "{{ query }}". Tente outro nome.</p>
+                {% else %}
+                <p>Nenhum outro perfil publico foi encontrado no momento.</p>
+                {% endif %}
+            </div>
+            {% endif %}
+        </section>
+    </main>
+</body>
+
+</html>

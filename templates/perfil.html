@@ -11,6 +11,7 @@
         href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/stylePerfil.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css') }}">
 </head>
 
 <body class="profile-page">
@@ -41,6 +42,7 @@
                 <a class="profile-tab" href="{{ url_for('movie.index') }}">Descobrir</a>
                 <a class="profile-tab" href="{{ url_for('catalogo.catalogo') }}">Catalogo</a>
                 <a class="profile-tab" href="{{ url_for('users.directory') }}">Plateia</a>
+                {% include 'components/notifications.html' %}
                 <a class="profile-tab is-active" href="{{ url_for('main.dashboard') }}">perfil</a>
                 <a class="profile-tab profile-tab--accent" href="{{ url_for('auth.logout') }}">sair</a>
             </nav>
@@ -429,6 +431,7 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
 </body>
 
 </html>

@@ -11,6 +11,7 @@
     href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css') }}">
 </head>
 
 <body class="discover-page">
@@ -30,6 +31,7 @@
       <div class="toolbar-utility">
         {% if current_user.is_authenticated %}
         <a class="utility-pill" href="{{ url_for('perfil.perfil') }}">perfil</a>
+        {% include 'components/notifications.html' %}
         <a class="utility-pill utility-pill--avatar" href="{{ url_for('perfil.perfil') }}">
           <img
             src="{{ url_for('static', filename='uploads/' + current_avatar) }}?{{ range(1,1000)|random }}"
@@ -186,6 +188,7 @@
   </main>
 
   <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
 </body>
 
 </html>

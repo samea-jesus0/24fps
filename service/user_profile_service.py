@@ -5,6 +5,8 @@ from sqlalchemy import func, or_
 
 from extensions import db
 from models.review import Review
+from models.review_comment import ReviewComment
+from models.review_like import ReviewLike
 from models.user import User
 from service.wishlist_service import list_public_wishlists
 
@@ -53,9 +55,18 @@ def _date_label(value):
     return value.strftime("%d/%m/%Y")
 
 
-def _review_payload(review):
+def _review_payload(review, viewer_user_id=None, highlighted_review_id=None):
+    like_count = ReviewLike.query.filter_by(review_id=review.id).count()
+    comment_count = ReviewComment.query.filter_by(review_id=review.id).count()
+    liked_by_current_user = False
+    if viewer_user_id:
+        liked_by_current_user = (
+            ReviewLike.query.filter_by(review_id=review.id, user_id=viewer_user_id).first() is not None
+        )
+
     return {
         "id": review.id,
+        "authorId": review.user_id,
         "movieId": review.filme_id,
         "movieTitle": review.filme_titulo,
         "posterUrl": review.poster_url,
@@ -65,6 +76,12 @@ def _review_payload(review):
         "createdAtLabel": _date_label(review.created_at),
         "updatedAt": _isoformat(review.updated_at),
         "movieUrl": _movie_url(review),
+        "reviewUrl": url_for("interactions.review_detail", review_id=review.id),
+        "likeCount": like_count,
+        "commentCount": comment_count,
+        "likedByCurrentUser": liked_by_current_user,
+        "canInteract": bool(viewer_user_id and viewer_user_id != review.user_id),
+        "isHighlighted": review.id == highlighted_review_id,
     }
 
 
@@ -188,7 +205,12 @@ def list_public_users(limit=USER_DIRECTORY_LIMIT, exclude_user_id=None, external
     return [_public_user_card_payload(user, external_urls=external_urls) for user in users]
 
 
-def get_public_user_profile(user_id, external_urls=False):
+def get_public_user_profile(
+    user_id,
+    external_urls=False,
+    viewer_user_id=None,
+    highlighted_review_id=None,
+):
     user = db.session.get(User, user_id)
     if not user:
         return None
@@ -199,6 +221,10 @@ def get_public_user_profile(user_id, external_urls=False):
         .limit(RECENT_REVIEWS_LIMIT)
         .all()
     )
+    if highlighted_review_id and not any(review.id == highlighted_review_id for review in recent_reviews):
+        highlighted_review = Review.query.filter_by(id=highlighted_review_id, user_id=user.id).first()
+        if highlighted_review:
+            recent_reviews = [highlighted_review, *recent_reviews[: RECENT_REVIEWS_LIMIT - 1]]
     review_count = Review.query.filter_by(user_id=user.id).count()
     public_lists = _load_public_lists(user.id)
 
@@ -220,7 +246,14 @@ def get_public_user_profile(user_id, external_urls=False):
             "lists": len(public_lists),
             "watchlist": 0,
         },
-        "recentReviews": [_review_payload(review) for review in recent_reviews],
+        "recentReviews": [
+            _review_payload(
+                review,
+                viewer_user_id=viewer_user_id,
+                highlighted_review_id=highlighted_review_id,
+            )
+            for review in recent_reviews
+        ],
         "lists": public_lists,
         "recentActivities": _build_recent_activities(recent_reviews),
     }

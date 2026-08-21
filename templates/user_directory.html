@@ -16,6 +16,7 @@
         href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/stylePerfil.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css') }}">
 </head>
 
 <body class="profile-page public-profile-page">
@@ -36,6 +37,7 @@
                 <a class="profile-tab" href="{{ url_for('catalogo.catalogo') if current_user.is_authenticated else url_for('auth.login') }}">Catalogo</a>
                 <a class="profile-tab is-active" href="{{ url_for('users.directory') }}">Plateia</a>
                 {% if current_user.is_authenticated %}
+                {% include 'components/notifications.html' %}
                 <a class="profile-tab" href="{{ url_for('perfil.perfil') }}">Meu perfil</a>
                 <a class="profile-tab profile-tab--accent" href="{{ url_for('auth.logout') }}">sair</a>
                 {% else %}
@@ -146,6 +148,9 @@
             {% endif %}
         </section>
     </main>
+    {% if current_user.is_authenticated %}
+    <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
+    {% endif %}
 </body>
 
 </html>

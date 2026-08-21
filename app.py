@@ -94,9 +94,11 @@ def ensure_review_columns():
         if "updated_at" not in existing_columns:
             connection.execute(text(f"UPDATE {quoted_table} SET updated_at = COALESCE(created_at, NOW()) WHERE updated_at IS NULL"))
 
-def create_app():
+def create_app(config_overrides=None):
     app = Flask(__name__)
     app.config.from_object(Config)
+    if config_overrides:
+        app.config.update(config_overrides)
 
     db.init_app(app)
     
@@ -107,12 +109,14 @@ def create_app():
     from controller.catalogo_controller import catalogo_bp
     from controller.dashboard_controller import main
     from controller.user_profile_controller import users_bp
+    from controller.review_interaction_controller import interactions_bp
     app.register_blueprint(movie_bp)
     app.register_blueprint(perfil_bp)
     app.register_blueprint(auth)
     app.register_blueprint(catalogo_bp)
     app.register_blueprint(main)
     app.register_blueprint(users_bp)
+    app.register_blueprint(interactions_bp)
     
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
@@ -130,6 +134,9 @@ def create_app():
         from models.review import Review
         from models.wishlist import Wishlist
         from models.wishlist_movie import WishlistMovie
+        from models.review_like import ReviewLike
+        from models.review_comment import ReviewComment
+        from models.notification import Notification
 
         db.create_all()
         ensure_user_profile_columns()

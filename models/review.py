@@ -17,3 +17,21 @@ class Review(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     user = db.relationship("User", back_populates="reviews")
+    likes = db.relationship(
+        "ReviewLike",
+        back_populates="review",
+        cascade="all, delete-orphan",
+        lazy="dynamic",
+    )
+    comments = db.relationship(
+        "ReviewComment",
+        back_populates="review",
+        cascade="all, delete-orphan",
+        lazy="dynamic",
+    )
+    notifications = db.relationship(
+        "Notification",
+        back_populates="review",
+        cascade="all, delete-orphan",
+        lazy="dynamic",
+    )

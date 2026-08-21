@@ -791,6 +791,194 @@ p {
     font-weight: 800;
 }
 
+.public-review-open-button,
+.review-social-button,
+.review-comment-form button {
+    border: none;
+    font: inherit;
+    cursor: pointer;
+}
+
+.public-review-open-button {
+    padding: 0;
+    background: transparent;
+    color: var(--olive-dark);
+    font-weight: 800;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.review-social-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.review-social-button,
+.review-social-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 38px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(137, 163, 77, 0.12);
+    color: var(--olive-dark);
+    font-size: 0.88rem;
+    font-weight: 800;
+}
+
+.review-social-button:hover,
+.review-social-button[aria-pressed="true"] {
+    background: rgba(201, 109, 95, 0.16);
+    color: #9a5146;
+}
+
+.review-social-button:focus-visible,
+.public-review-open-button:focus-visible,
+.review-comment-form button:focus-visible {
+    outline: 3px solid rgba(137, 163, 77, 0.4);
+    outline-offset: 3px;
+}
+
+.review-comments {
+    display: grid;
+    gap: 14px;
+    padding: 16px;
+    border: 1px solid rgba(96, 118, 69, 0.12);
+    border-radius: 20px;
+    background: rgba(255, 249, 228, 0.72);
+}
+
+.review-comments[hidden] {
+    display: none;
+}
+
+.review-comments__list {
+    display: grid;
+    gap: 12px;
+}
+
+.review-comment-item {
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr);
+    gap: 10px;
+    padding: 12px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.86);
+}
+
+.review-comment-item--highlighted {
+    box-shadow: 0 0 0 3px rgba(242, 215, 139, 0.72);
+}
+
+.review-comment-item__avatar {
+    width: 38px;
+    height: 38px;
+    border: 2px solid rgba(96, 118, 69, 0.16);
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.review-comment-item__copy {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+}
+
+.review-comment-item__copy strong {
+    color: var(--ink);
+    font-size: 0.9rem;
+}
+
+.review-comment-item__copy p,
+.review-comment-item__copy time,
+.review-comments__loading,
+.review-comments__empty,
+.review-comments__notice,
+.review-comment-form__error {
+    margin: 0;
+}
+
+.review-comment-item__copy p {
+    overflow-wrap: anywhere;
+}
+
+.review-comment-item__copy time {
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.review-comments__loading,
+.review-comments__empty,
+.review-comments__notice {
+    color: var(--muted);
+}
+
+.review-comments__notice a {
+    color: var(--olive-dark);
+    font-weight: 800;
+}
+
+.review-comment-form {
+    display: grid;
+    gap: 8px;
+}
+
+.review-comment-form label {
+    color: var(--ink);
+    font-size: 0.9rem;
+    font-weight: 800;
+}
+
+.review-comment-form__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: end;
+}
+
+.review-comment-form textarea {
+    width: 100%;
+    min-height: 82px;
+    padding: 10px 12px;
+    border: 2px solid rgba(96, 118, 69, 0.16);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--ink);
+    font: inherit;
+    resize: vertical;
+}
+
+.review-comment-form textarea:focus {
+    outline: none;
+    border-color: rgba(96, 118, 69, 0.46);
+    box-shadow: 0 0 0 4px rgba(137, 163, 77, 0.12);
+}
+
+.review-comment-form button {
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #ffe39a 0%, #f4ca67 100%);
+    color: var(--ink);
+    font-weight: 800;
+}
+
+.review-comment-form button:disabled,
+.review-social-button:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+.review-comment-form__error {
+    color: #a1483e;
+    font-size: 0.86rem;
+    font-weight: 800;
+}
+
 .public-list-grid {
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
@@ -1988,6 +2176,14 @@ p {
 
     .directory-user-avatar {
         aspect-ratio: 1 / 1;
+    }
+
+    .review-comment-form__row {
+        grid-template-columns: 1fr;
+    }
+
+    .review-comment-form button {
+        width: 100%;
     }
 }
 

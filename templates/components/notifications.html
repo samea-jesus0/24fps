@@ -1,0 +1,19 @@
+<div class="notifications" data-notifications>
+    <button
+        class="notification-trigger"
+        type="button"
+        aria-label="Abrir notificações"
+        aria-expanded="false"
+        aria-controls="notificationMenu">
+        <span class="notification-trigger__icon" aria-hidden="true">&#128276;</span>
+        <span class="notification-trigger__count" data-notification-count hidden>0</span>
+    </button>
+
+    <section class="notification-menu" id="notificationMenu" data-notification-menu hidden aria-label="Notificações">
+        <div class="notification-menu__header">
+            <strong>Notificações</strong>
+            <span data-notification-menu-status></span>
+        </div>
+        <div class="notification-menu__list" data-notification-list></div>
+    </section>
+</div>

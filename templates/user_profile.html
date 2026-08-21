@@ -20,6 +20,7 @@
         href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/stylePerfil.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css') }}">
 </head>
 
 <body class="profile-page public-profile-page">
@@ -46,6 +47,7 @@
                 <a class="profile-tab" href="{{ url_for('catalogo.catalogo') if current_user.is_authenticated else url_for('auth.login') }}">Catalogo</a>
                 <a class="profile-tab is-active" href="{{ url_for('users.directory') }}">Plateia</a>
                 {% if current_user.is_authenticated %}
+                    {% include 'components/notifications.html' %}
                     <a class="profile-tab" href="{{ url_for('perfil.perfil') }}">Meu perfil</a>
                     <a class="profile-tab profile-tab--accent" href="{{ url_for('auth.logout') }}">sair</a>
                 {% else %}
@@ -157,17 +159,11 @@
                 <div class="public-review-list">
                     {% for review in profile.recentReviews %}
                     <article
-                        class="public-review-item public-review-item--interactive"
-                        tabindex="0"
-                        role="button"
-                        aria-label="Abrir detalhes de {{ review.movieTitle }}"
-                        data-public-movie-trigger
-                        data-movie-id="{{ review.movieId or '' }}"
-                        data-movie-title="{{ review.movieTitle or '' }}"
-                        data-source-label="Resenha publicada"
-                        data-rating="{{ review.rating }}"
-                        data-created-at-label="{{ review.createdAtLabel }}"
-                        data-review-content="{{ review.content }}">
+                        id="review-{{ review.id }}"
+                        class="public-review-item"
+                        data-review-interactions
+                        data-review-id="{{ review.id }}"
+                        data-can-interact="{{ 'true' if review.canInteract else 'false' }}">
                         {% if review.posterUrl %}
                         <div class="public-review-poster" aria-hidden="true">
                             <img src="{{ review.posterUrl }}" alt="Poster de {{ review.movieTitle }}" loading="lazy">
@@ -182,9 +178,53 @@
                             <p>{{ review.content }}</p>
                             <div class="public-review-footer">
                                 <a href="{{ url_for('users.public_profile', user_id=profile.id) }}" data-skip-public-movie-trigger>por {{ profile.displayName }}</a>
-                                <span class="public-review-open-hint">clique para abrir a ficha</span>
+                                <button
+                                    class="public-review-open-button"
+                                    type="button"
+                                    data-public-movie-trigger
+                                    data-skip-review-interactions
+                                    data-movie-id="{{ review.movieId or '' }}"
+                                    data-movie-title="{{ review.movieTitle or '' }}"
+                                    data-source-label="Resenha publicada"
+                                    data-rating="{{ review.rating }}"
+                                    data-created-at-label="{{ review.createdAtLabel }}"
+                                    data-review-content="{{ review.content }}">abrir ficha</button>
                                 <span>{{ review.createdAtLabel }}</span>
                             </div>
+                            <div class="review-social-actions" data-skip-public-movie-trigger>
+                                {% if current_user.is_authenticated and review.canInteract %}
+                                <button class="review-social-button" type="button" data-review-like aria-pressed="{{ 'true' if review.likedByCurrentUser else 'false' }}">
+                                    <span aria-hidden="true">&#9825;</span>
+                                    <span data-review-like-label>{{ 'Curtido' if review.likedByCurrentUser else 'Curtir' }}</span>
+                                    <span data-review-like-count>{{ review.likeCount }}</span>
+                                </button>
+                                {% else %}
+                                <span class="review-social-count"><span aria-hidden="true">&#9825;</span> {{ review.likeCount }} curtidas</span>
+                                {% endif %}
+                                <button class="review-social-button" type="button" data-review-toggle-comments>
+                                    <span aria-hidden="true">&#128172;</span>
+                                    Comentários <span data-review-comment-count>{{ review.commentCount }}</span>
+                                </button>
+                            </div>
+                            <section class="review-comments" data-review-comments-panel hidden aria-label="Comentários da resenha">
+                                <div class="review-comments__list" data-review-comments-list>
+                                    <p class="review-comments__loading">Carregando comentários...</p>
+                                </div>
+                                {% if current_user.is_authenticated and review.canInteract %}
+                                <form class="review-comment-form" data-review-comment-form>
+                                    <label for="comment-{{ review.id }}">Adicionar comentário</label>
+                                    <div class="review-comment-form__row">
+                                        <textarea id="comment-{{ review.id }}" name="content" maxlength="1200" rows="3" required placeholder="Compartilhe sua opinião sobre esta resenha"></textarea>
+                                        <button type="submit">Comentar</button>
+                                    </div>
+                                    <p class="review-comment-form__error" data-review-comment-error hidden></p>
+                                </form>
+                                {% elif not current_user.is_authenticated %}
+                                <p class="review-comments__notice"><a href="{{ url_for('auth.login') }}">Entre</a> para curtir ou comentar nesta resenha.</p>
+                                {% else %}
+                                <p class="review-comments__notice">Esta é a sua resenha. Você pode acompanhar os comentários recebidos aqui.</p>
+                                {% endif %}
+                            </section>
                         </div>
                     </article>
                     {% endfor %}
@@ -298,6 +338,10 @@
     {% endif %}
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/review-interactions.js') }}"></script>
+    {% if current_user.is_authenticated %}
+    <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
+    {% endif %}
 </body>
 
 </html>

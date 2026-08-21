@@ -28,3 +28,29 @@ class User(db.Model, UserMixin):
         cascade="all, delete-orphan",
         lazy="dynamic",
     )
+    review_likes = db.relationship(
+        "ReviewLike",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="dynamic",
+    )
+    review_comments = db.relationship(
+        "ReviewComment",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="dynamic",
+    )
+    received_notifications = db.relationship(
+        "Notification",
+        foreign_keys="Notification.recipient_user_id",
+        back_populates="recipient",
+        cascade="all, delete-orphan",
+        lazy="dynamic",
+    )
+    created_notifications = db.relationship(
+        "Notification",
+        foreign_keys="Notification.actor_user_id",
+        back_populates="actor",
+        cascade="all, delete-orphan",
+        lazy="dynamic",
+    )

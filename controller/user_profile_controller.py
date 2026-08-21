@@ -36,6 +36,14 @@ def _profile_not_found_response(wants_json):
     )
 
 
+def _optional_positive_int(value):
+    try:
+        parsed_value = int(value)
+    except (TypeError, ValueError):
+        return None
+    return parsed_value if parsed_value > 0 else None
+
+
 @users_bp.route("/users")
 def directory():
     wants_json = _wants_json_response()
@@ -78,7 +86,14 @@ def directory():
 @users_bp.route("/users/<int:user_id>")
 def public_profile(user_id):
     wants_json = _wants_json_response()
-    profile = get_public_user_profile(user_id, external_urls=not wants_json)
+    viewer_user_id = current_user.id if current_user.is_authenticated else None
+    highlighted_review_id = _optional_positive_int(request.args.get("review"))
+    profile = get_public_user_profile(
+        user_id,
+        external_urls=not wants_json,
+        viewer_user_id=viewer_user_id,
+        highlighted_review_id=highlighted_review_id,
+    )
 
     if not profile:
         return _profile_not_found_response(wants_json)
@@ -100,7 +115,13 @@ def public_profile(user_id):
 
 @users_bp.route("/api/users/<int:user_id>")
 def public_profile_api(user_id):
-    profile = get_public_user_profile(user_id)
+    viewer_user_id = current_user.id if current_user.is_authenticated else None
+    highlighted_review_id = _optional_positive_int(request.args.get("review"))
+    profile = get_public_user_profile(
+        user_id,
+        viewer_user_id=viewer_user_id,
+        highlighted_review_id=highlighted_review_id,
+    )
     if not profile:
         return jsonify({"erro": "Usuario nao encontrado"}), 404
     return jsonify(profile)

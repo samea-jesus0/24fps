@@ -209,6 +209,28 @@ def buscar_filme_por_id(imdb_id):
     return _normalize_movie_data(data)
 
 
+def resolver_metadados_filme(movie_id=None, title=None):
+    movie_id = (movie_id or "").strip()
+    title = (title or "").strip()
+
+    movie = buscar_filme_por_id(movie_id) if movie_id else None
+    if not movie and title:
+        movie = buscar_filme_por_nome(title)
+
+    if not movie:
+        return {}
+
+    genres = movie.get("generos") or _split_list(movie.get("genero"))
+
+    return {
+        "filme_id": movie.get("id") or movie_id or None,
+        "filme_titulo": movie.get("titulo") or title,
+        "poster_url": movie.get("poster"),
+        "generos": ", ".join(genres) if genres else None,
+        "ano_lancamento": movie.get("ano"),
+    }
+
+
 def _fetch_movie_by_id(imdb_id, source_rank=0):
     api_key = _get_api_key()
     data = _request_movie_by_id_cached(api_key, imdb_id)

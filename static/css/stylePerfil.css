@@ -691,6 +691,152 @@ p {
     font-family: "Averia Serif Libre", "Georgia", serif;
 }
 
+.public-statistics-section {
+    display: grid;
+    gap: 22px;
+    margin: 0 24px 24px;
+    padding: clamp(22px, 4vw, 32px);
+    border-radius: 28px;
+    border: 2px solid rgba(201, 109, 95, 0.18);
+    background:
+        linear-gradient(180deg, rgba(255, 252, 243, 0.98), rgba(255, 245, 221, 0.98));
+}
+
+.profile-statistics-section {
+    margin: 10px 32px 0;
+}
+
+.statistics-state {
+    display: grid;
+    gap: 10px;
+    padding: 22px;
+    border-radius: 24px;
+    border: 1px dashed rgba(96, 118, 69, 0.18);
+    background: rgba(255, 255, 255, 0.72);
+}
+
+.statistics-state--error {
+    border-color: rgba(201, 109, 95, 0.36);
+    background: rgba(201, 109, 95, 0.10);
+}
+
+.statistics-content {
+    display: grid;
+    gap: 22px;
+}
+
+.statistics-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.statistics-card {
+    display: grid;
+    gap: 8px;
+    min-height: 132px;
+    padding: 20px;
+    border-radius: 24px;
+    border: 1px solid rgba(96, 118, 69, 0.12);
+    background: rgba(255, 255, 255, 0.84);
+}
+
+.statistics-card strong {
+    color: var(--ink);
+    font-family: "Averia Serif Libre", "Georgia", serif;
+    font-size: clamp(1.7rem, 3vw, 2.45rem);
+    line-height: 1;
+}
+
+.statistics-card span {
+    color: var(--olive-dark);
+    font-weight: 800;
+}
+
+.statistics-card small {
+    color: var(--muted);
+    font-weight: 700;
+    line-height: 1.45;
+}
+
+.statistics-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.statistics-panel {
+    display: grid;
+    align-content: start;
+    gap: 14px;
+    padding: 20px;
+    border-radius: 24px;
+    border: 1px solid rgba(96, 118, 69, 0.12);
+    background: rgba(255, 255, 255, 0.82);
+}
+
+.statistics-panel--wide {
+    grid-column: 1 / -1;
+}
+
+.statistics-panel h3,
+.statistics-rating-list strong {
+    margin: 0;
+    color: var(--ink);
+    font-family: "Averia Serif Libre", "Georgia", serif;
+    font-size: 1.25rem;
+}
+
+.statistics-bar-list,
+.statistics-rating-list {
+    display: grid;
+    gap: 12px;
+}
+
+.statistics-bar-item {
+    display: grid;
+    gap: 7px;
+}
+
+.statistics-bar-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--ink);
+    font-weight: 800;
+}
+
+.statistics-bar-track {
+    height: 12px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(137, 163, 77, 0.14);
+}
+
+.statistics-bar-fill {
+    width: var(--bar-width, 0%);
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--tomato), var(--gold));
+}
+
+.statistics-rating-item {
+    display: grid;
+    gap: 6px;
+    padding: 14px;
+    border-radius: 18px;
+    background: rgba(255, 249, 228, 0.72);
+}
+
+.statistics-empty-note {
+    margin-top: 0;
+    padding: 18px;
+    border-radius: 20px;
+    border: 1px dashed rgba(96, 118, 69, 0.18);
+    background: rgba(255, 255, 255, 0.7);
+    text-align: center;
+}
+
 .public-profile-content {
     grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -2037,6 +2183,15 @@ p {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .statistics-summary-grid,
+    .statistics-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .statistics-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .public-profile-header {
         grid-template-columns: 1fr;
         justify-items: center;
@@ -2069,11 +2224,23 @@ p {
     .profile-grid,
     .profile-reviews,
     .profile-wishlists,
+    .profile-statistics-section,
     .public-profile-hero,
     .public-stats-grid,
     .public-profile-content {
         padding-left: 16px;
         padding-right: 16px;
+    }
+
+    .public-statistics-section {
+        margin-left: 16px;
+        margin-right: 16px;
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .profile-statistics-section {
+        margin-top: 10px;
     }
 
     .profile-topbar {
@@ -2164,6 +2331,10 @@ p {
     }
 
     .public-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .statistics-summary-grid {
         grid-template-columns: 1fr;
     }
 

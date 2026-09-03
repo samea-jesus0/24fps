@@ -100,7 +100,8 @@
                     </div>
 
                     <div class="hero-links">
-                        <a class="hero-link hero-link--primary" href="#publicReviews">ver resenhas</a>
+                        <a class="hero-link hero-link--primary" href="#publicStatistics">ver estatisticas</a>
+                        <a class="hero-link" href="#publicReviews">ver resenhas</a>
                         <a class="hero-link" href="#publicLists">ver listas</a>
                         <a class="hero-link" href="{{ url_for('users.directory') }}">buscar outros plateia</a>
                         {% if current_user.is_authenticated and current_user.id == profile.id %}
@@ -129,23 +130,21 @@
             </aside>
         </section>
 
-        <section class="public-stats-grid" aria-label="Estatisticas do usuario">
-            <article class="public-stat-card">
-                <strong>{{ profile.stats.ratings }}</strong>
-                <span>filmes avaliados</span>
-            </article>
-            <article class="public-stat-card">
-                <strong>{{ profile.stats.reviews }}</strong>
-                <span>resenhas</span>
-            </article>
-            <article class="public-stat-card">
-                <strong>{{ profile.stats.lists }}</strong>
-                <span>listas publicas</span>
-            </article>
-            <article class="public-stat-card">
-                <strong>{{ profile.stats.watchlist }}</strong>
-                <span>para assistir</span>
-            </article>
+        <section
+            id="publicStatistics"
+            class="public-statistics-section"
+            data-profile-statistics
+            data-statistics-url="{{ url_for('users.public_profile_statistics_api', user_id=profile.id) }}"
+            aria-live="polite">
+            <div class="public-section-head">
+                <span class="eyebrow">Estatisticas</span>
+                <h2>Habitos cinematograficos</h2>
+            </div>
+
+            <div class="statistics-state statistics-state--loading" data-statistics-content>
+                <span class="card-kicker">Carregando</span>
+                <p>Carregando estatisticas...</p>
+            </div>
         </section>
 
         <section class="public-profile-content">

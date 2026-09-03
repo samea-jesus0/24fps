@@ -76,6 +76,10 @@ def ensure_review_columns():
         alter_statements.append(f"ALTER TABLE {quoted_table} ADD COLUMN filme_id VARCHAR(100) NULL")
     if "poster_url" not in existing_columns:
         alter_statements.append(f"ALTER TABLE {quoted_table} ADD COLUMN poster_url VARCHAR(500) NULL")
+    if "generos" not in existing_columns:
+        alter_statements.append(f"ALTER TABLE {quoted_table} ADD COLUMN generos TEXT NULL")
+    if "ano_lancamento" not in existing_columns:
+        alter_statements.append(f"ALTER TABLE {quoted_table} ADD COLUMN ano_lancamento INTEGER NULL")
     if "created_at" not in existing_columns:
         alter_statements.append(f"ALTER TABLE {quoted_table} ADD COLUMN created_at DATETIME NULL")
     if "updated_at" not in existing_columns:

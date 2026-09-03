@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, request, jsonify
 from extensions import db
 from models.pesquisa import Search
 from models.review import Review
-from service.filme_service import buscar_filme_por_nome
+from service.filme_service import resolver_metadados_filme
 from service.wishlist_service import (
     add_movie_to_wishlist,
     create_wishlist as create_wishlist_service,
@@ -24,11 +24,27 @@ def _review_payload(review):
         "filme_id": review.filme_id,
         "filme_titulo": review.filme_titulo,
         "poster_url": review.poster_url,
+        "generos": review.generos,
+        "ano_lancamento": review.ano_lancamento,
         "conteudo": review.conteudo,
         "nota": review.nota,
         "created_at": review.created_at.isoformat() if review.created_at else None,
         "updated_at": review.updated_at.isoformat() if review.updated_at else None,
     }
+
+
+def _movie_key(movie_id, title):
+    movie_id = (movie_id or "").strip().lower()
+    if movie_id:
+        return f"imdb:{movie_id}"
+    return f"title:{' '.join((title or '').strip().lower().split())}"
+
+
+def _safe_movie_metadata(movie_id, title):
+    try:
+        return resolver_metadados_filme(movie_id=movie_id, title=title)
+    except Exception:
+        return {}
 
 
 @perfil_bp.route('/perfil')
@@ -63,23 +79,19 @@ def create_review():
     if nota < 0 or nota > 5:
         return jsonify({"erro": "A nota deve ser entre 0 e 5."}), 400
 
-    # Se não temos poster_url, tentar buscar do OMDB
+    metadata = _safe_movie_metadata(filme_id, filme_titulo)
+    if not filme_id and metadata.get("filme_id"):
+        filme_id = metadata["filme_id"]
     if not poster_url:
-        try:
-            if filme_id:
-                filme_data = buscar_filme_por_nome(filme_id)  # buscar por ID
-            else:
-                filme_data = buscar_filme_por_nome(filme_titulo)
-            if filme_data and filme_data.get("poster"):
-                poster_url = filme_data["poster"]
-        except Exception:
-            pass  # Ignorar erros na busca do poster
+        poster_url = metadata.get("poster_url")
 
     review = Review(
         user_id=current_user.id,
         filme_id=filme_id,
         filme_titulo=filme_titulo,
         poster_url=poster_url,
+        generos=metadata.get("generos"),
+        ano_lancamento=metadata.get("ano_lancamento"),
         conteudo=conteudo,
         nota=nota,
         created_at=datetime.utcnow(),
@@ -115,21 +127,21 @@ def update_review(review_id):
     if nota < 0 or nota > 5:
         return jsonify({"erro": "A nota deve ser entre 0 e 5."}), 400
 
-    # Se não temos poster_url, tentar buscar do OMDB
+    previous_movie_key = _movie_key(review.filme_id, review.filme_titulo)
+    next_movie_key = _movie_key(filme_id, filme_titulo)
+    movie_changed = previous_movie_key != next_movie_key
+    metadata = _safe_movie_metadata(filme_id, filme_titulo)
+
+    if not filme_id and metadata.get("filme_id"):
+        filme_id = metadata["filme_id"]
     if not poster_url:
-        try:
-            if filme_id:
-                filme_data = buscar_filme_por_nome(filme_id)  # buscar por ID
-            else:
-                filme_data = buscar_filme_por_nome(filme_titulo)
-            if filme_data and filme_data.get("poster"):
-                poster_url = filme_data["poster"]
-        except Exception:
-            pass  # Ignorar erros na busca do poster
+        poster_url = metadata.get("poster_url") or (review.poster_url if not movie_changed else None)
 
     review.filme_id = filme_id
     review.filme_titulo = filme_titulo
     review.poster_url = poster_url
+    review.generos = metadata.get("generos") or (review.generos if not movie_changed else None)
+    review.ano_lancamento = metadata.get("ano_lancamento") or (review.ano_lancamento if not movie_changed else None)
     review.conteudo = conteudo
     review.nota = nota
     review.updated_at = datetime.utcnow()

@@ -557,6 +557,7 @@ async function submitReviewForm(event) {
 
         addOrUpdateSlide(result);
         hideReviewModal();
+        refreshProfileStatistics();
     } catch (error) {
         showReviewError(error.message);
     }
@@ -572,6 +573,7 @@ async function deleteReview(event) {
         await requestReview(`${REVIEW_API_BASE}/${reviewId}`, { method: "DELETE" });
         removeReviewSlide(reviewId);
         hideReviewModal();
+        refreshProfileStatistics();
     } catch (error) {
         showReviewError(error.message);
     }
@@ -1143,6 +1145,7 @@ async function submitWishlistForm(event) {
         }
         hideWishlistModal();
         showRuntimeToast(isEditing ? "Wishlist atualizada com sucesso." : "Wishlist criada com sucesso.");
+        refreshProfileStatistics();
     } catch (error) {
         showWishlistError(error.message);
     } finally {
@@ -1189,6 +1192,7 @@ async function submitWishlistMovieForm(event) {
         replaceWishlistCard(wishlist, currentPage);
         hideWishlistMovieModal();
         showRuntimeToast("Filme adicionado na wishlist.");
+        refreshProfileStatistics();
     } catch (error) {
         showWishlistMovieError(error.message);
     } finally {
@@ -1217,6 +1221,7 @@ async function removeWishlistMovie(button) {
         );
         replaceWishlistCard(wishlist, currentPage);
         showRuntimeToast("Filme removido da wishlist.");
+        refreshProfileStatistics();
     } catch (error) {
         showRuntimeToast(error.message, "error");
         if (button.isConnected) {
@@ -1247,6 +1252,7 @@ async function deleteWishlist(button) {
         await requestWishlist(`${WISHLIST_API_BASE}/${wishlistId}`, { method: "DELETE" });
         removeWishlistCard(wishlistId);
         showRuntimeToast("Wishlist excluida com sucesso.");
+        refreshProfileStatistics();
     } catch (error) {
         showRuntimeToast(error.message, "error");
         if (button.isConnected) {
@@ -1546,6 +1552,170 @@ function bindPublicProfileMovieModal() {
     });
 }
 
+function formatStatisticNumber(value) {
+    const number = Number(value || 0);
+    return number.toLocaleString("pt-BR");
+}
+
+function formatStatisticAverage(value, scale = 5) {
+    if (value === null || value === undefined) {
+        return "Sem nota";
+    }
+
+    const number = Number(value);
+    if (Number.isNaN(number)) {
+        return "Sem nota";
+    }
+
+    return `${number.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} / ${scale}`;
+}
+
+function pluralizeMovie(count) {
+    return Number(count) === 1 ? "filme" : "filmes";
+}
+
+function renderStatisticCard(label, value, detail) {
+    const detailMarkup = detail ? `<small>${escapeHtml(detail)}</small>` : "";
+    return `
+        <article class="statistics-card">
+            <span>${escapeHtml(label)}</span>
+            <strong>${escapeHtml(value)}</strong>
+            ${detailMarkup}
+        </article>
+    `;
+}
+
+function renderStatisticBars(items, emptyMessage) {
+    if (!Array.isArray(items) || items.length === 0) {
+        return `<p class="statistics-empty-note">${escapeHtml(emptyMessage)}</p>`;
+    }
+
+    const maxCount = Math.max(...items.map((item) => Number(item.count || 0)), 1);
+    return `
+        <div class="statistics-bar-list">
+            ${items.map((item) => {
+                const label = item.genre || item.year || "Nao informado";
+                const count = Number(item.count || 0);
+                const width = count > 0 ? Math.max(6, Math.round((count / maxCount) * 100)) : 0;
+                return `
+                    <div class="statistics-bar-item">
+                        <div class="statistics-bar-label">
+                            <span>${escapeHtml(label)}</span>
+                            <span>${formatStatisticNumber(count)} ${pluralizeMovie(count)}</span>
+                        </div>
+                        <div class="statistics-bar-track" aria-hidden="true">
+                            <div class="statistics-bar-fill" style="--bar-width: ${width}%;"></div>
+                        </div>
+                    </div>
+                `;
+            }).join("")}
+        </div>
+    `;
+}
+
+function renderRatingHighlights(statistics) {
+    const highlights = [
+        { label: "Maior nota", movie: statistics.highestRatedMovie },
+        { label: "Menor nota", movie: statistics.lowestRatedMovie },
+    ].filter((item) => item.movie);
+
+    if (!highlights.length) {
+        return '<p class="statistics-empty-note">Ainda nao ha notas suficientes.</p>';
+    }
+
+    return `
+        <div class="statistics-rating-list">
+            ${highlights.map((item) => `
+                <div class="statistics-rating-item">
+                    <span>${escapeHtml(item.label)}</span>
+                    <strong>${escapeHtml(item.movie.title || "Filme")}</strong>
+                    <small>${formatStatisticAverage(item.movie.rating, statistics.ratingScale || 5)}</small>
+                </div>
+            `).join("")}
+        </div>
+    `;
+}
+
+function renderProfileStatistics(statistics) {
+    const totalWatched = Number(statistics.totalWatched || 0);
+    const totalRatings = Number(statistics.totalRatings || 0);
+    const totalLists = Number(statistics.totalLists || 0);
+    const totalMoviesInLists = Number(statistics.totalMoviesInLists || 0);
+    const ratingDetail = totalRatings
+        ? `${formatStatisticNumber(totalRatings)} ${totalRatings === 1 ? "avaliacao" : "avaliacoes"}`
+        : "Sem avaliacoes";
+    const listDetail = totalMoviesInLists
+        ? `${formatStatisticNumber(totalMoviesInLists)} ${pluralizeMovie(totalMoviesInLists)} em listas`
+        : "Nenhum filme em listas";
+
+    const summary = `
+        <div class="statistics-summary-grid">
+            ${renderStatisticCard("Filmes assistidos", formatStatisticNumber(totalWatched), statistics.definitions?.watched)}
+            ${renderStatisticCard("Media das notas", formatStatisticAverage(statistics.averageRating, statistics.ratingScale || 5), ratingDetail)}
+            ${renderStatisticCard("Resenhas", formatStatisticNumber(statistics.totalReviews || 0), "Publicadas no perfil")}
+            ${renderStatisticCard("Listas publicas", formatStatisticNumber(totalLists), listDetail)}
+        </div>
+    `;
+
+    if (!statistics.hasMovieHistory) {
+        return `
+            ${summary}
+            <p class="statistics-empty-note">Este usuario ainda nao possui estatisticas suficientes.</p>
+        `;
+    }
+
+    return `
+        ${summary}
+        <div class="statistics-detail-grid">
+            <article class="statistics-panel">
+                <h3>Generos mais vistos</h3>
+                ${renderStatisticBars(statistics.topGenres, "Ainda nao ha generos suficientes.")}
+            </article>
+            <article class="statistics-panel">
+                <h3>Filmes assistidos por ano</h3>
+                ${renderStatisticBars(statistics.watchedByYear, "Ainda nao ha anos suficientes.")}
+            </article>
+            <article class="statistics-panel statistics-panel--wide">
+                <h3>Destaques das notas</h3>
+                ${renderRatingHighlights(statistics)}
+            </article>
+        </div>
+    `;
+}
+
+function renderProfileStatisticsError(container) {
+    container.className = "statistics-state statistics-state--error";
+    container.innerHTML = `
+        <span class="card-kicker">Erro</span>
+        <p>Nao foi possivel carregar as estatisticas.</p>
+    `;
+}
+
+async function loadProfileStatistics(section) {
+    const url = section?.dataset?.statisticsUrl;
+    const container = section?.querySelector("[data-statistics-content]");
+    if (!url || !container) {
+        return;
+    }
+
+    try {
+        const response = await fetch(url);
+        const statistics = await response.json();
+        if (!response.ok) {
+            throw new Error(statistics.erro || "Falha ao carregar estatisticas.");
+        }
+
+        container.className = "statistics-content";
+        container.innerHTML = renderProfileStatistics(statistics);
+    } catch (error) {
+        renderProfileStatisticsError(container);
+    }
+}
+
+function refreshProfileStatistics() {
+    document.querySelectorAll("[data-profile-statistics]").forEach(loadProfileStatistics);
+}
+
 // Funções para autocomplete de filmes no modal de review
 let movieSuggestionsTimeout = null;
 let selectedSuggestionIndex = -1;
@@ -1767,4 +1937,5 @@ document.addEventListener("DOMContentLoaded", () => {
     bindWishlistEvents();
     initializeWishlistCatalogs();
     bindPublicProfileMovieModal();
+    refreshProfileStatistics();
 });

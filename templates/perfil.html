@@ -142,6 +142,23 @@
             </article>
         </section>
 
+        <section
+            id="profileStatistics"
+            class="public-statistics-section profile-statistics-section reveal reveal-delay-4"
+            data-profile-statistics
+            data-statistics-url="{{ url_for('users.public_profile_statistics_api', user_id=user.id) }}"
+            aria-live="polite">
+            <div class="public-section-head">
+                <span class="eyebrow">Estatisticas</span>
+                <h2>Seu historico em numeros</h2>
+            </div>
+
+            <div class="statistics-state statistics-state--loading" data-statistics-content>
+                <span class="card-kicker">Carregando</span>
+                <p>Carregando estatisticas...</p>
+            </div>
+        </section>
+
         <section class="profile-reviews reveal reveal-delay-4">
             <div class="review-header">
                 <div>

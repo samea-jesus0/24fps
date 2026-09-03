@@ -227,6 +227,7 @@ def get_public_user_profile(
             recent_reviews = [highlighted_review, *recent_reviews[: RECENT_REVIEWS_LIMIT - 1]]
     review_count = Review.query.filter_by(user_id=user.id).count()
     public_lists = _load_public_lists(user.id)
+    public_list_movie_count = sum(wishlist.get("movieCount", 0) for wishlist in public_lists)
 
     return {
         "id": user.id,
@@ -244,7 +245,7 @@ def get_public_user_profile(
             "reviews": review_count,
             "ratings": _count_reviewed_movies(user.id),
             "lists": len(public_lists),
-            "watchlist": 0,
+            "watchlist": public_list_movie_count,
         },
         "recentReviews": [
             _review_payload(

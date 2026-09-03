@@ -11,6 +11,8 @@ class Review(db.Model):
     filme_id = db.Column(db.String(100), nullable=True)
     filme_titulo = db.Column(db.String(255), nullable=False)
     poster_url = db.Column(db.String(500), nullable=True)
+    generos = db.Column(db.Text, nullable=True)
+    ano_lancamento = db.Column(db.Integer, nullable=True)
     conteudo = db.Column(db.Text, nullable=False)
     nota = db.Column(db.Integer, nullable=False, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)

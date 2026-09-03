@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, render_template, request
 from flask_login import current_user
 
 from service.user_profile_service import get_public_user_profile, list_public_users, search_public_users
+from service.user_statistics_service import get_public_user_statistics
 
 
 users_bp = Blueprint("users", __name__)
@@ -125,6 +126,14 @@ def public_profile_api(user_id):
     if not profile:
         return jsonify({"erro": "Usuario nao encontrado"}), 404
     return jsonify(profile)
+
+
+@users_bp.route("/api/users/<int:user_id>/statistics")
+def public_profile_statistics_api(user_id):
+    statistics = get_public_user_statistics(user_id)
+    if not statistics:
+        return jsonify({"erro": "Usuario nao encontrado"}), 404
+    return jsonify(statistics)
 
 
 @users_bp.route("/api/users")

@@ -141,6 +141,7 @@ def create_app(config_overrides=None):
         from models.review_like import ReviewLike
         from models.review_comment import ReviewComment
         from models.notification import Notification
+        from models.user_follow import UserFollow
 
         db.create_all()
         ensure_user_profile_columns()

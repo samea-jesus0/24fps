@@ -15,6 +15,8 @@ from service.wishlist_service import (
 )
 from flask_login import login_required, current_user
 
+from service.user_profile_service import count_followers, count_following
+
 perfil_bp = Blueprint("perfil", __name__)
 
 
@@ -56,7 +58,16 @@ def perfil():
         .all()
     )
     wishlists = list_user_wishlists(current_user.id)
-    return render_template("perfil.html", user=current_user, reviews=reviews, wishlists=wishlists)
+    following_count = count_following(current_user.id)
+    follower_count = count_followers(current_user.id)
+    return render_template(
+        "perfil.html",
+        user=current_user,
+        reviews=reviews,
+        wishlists=wishlists,
+        following_count=following_count,
+        follower_count=follower_count,
+    )
 
 
 @perfil_bp.route('/perfil/reviews', methods=['POST'])

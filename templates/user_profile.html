@@ -99,6 +99,31 @@
                         <span>{{ profile.stats.reviews }} resenhas publicadas</span>
                     </div>
 
+                    {% if current_user.is_authenticated and current_user.id != profile.id %}
+                    <div class="profile-follow-actions">
+                        <button
+                            class="follow-toggle-button {% if profile.isFollowing %}is-following{% endif %}"
+                            type="button"
+                            data-follow-toggle
+                            data-user-id="{{ profile.id }}"
+                            data-authenticated="true"
+                            data-is-following="{{ 'true' if profile.isFollowing else 'false' }}">
+                            {{ 'Seguindo' if profile.isFollowing else 'Seguir' }}
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <div class="profile-follow-stat-row">
+                        <button class="profile-follow-stat" type="button" data-follow-list-open="following" data-user-id="{{ profile.id }}">
+                            <span>Seguindo</span>
+                            <strong data-follow-count="following" data-user-id="{{ profile.id }}">{{ profile.followingCount }}</strong>
+                        </button>
+                        <button class="profile-follow-stat" type="button" data-follow-list-open="followers" data-user-id="{{ profile.id }}">
+                            <span>Seguidores</span>
+                            <strong data-follow-count="followers" data-user-id="{{ profile.id }}">{{ profile.followerCount }}</strong>
+                        </button>
+                    </div>
+
                     <div class="hero-links">
                         <a class="hero-link hero-link--primary" href="#publicStatistics">ver estatisticas</a>
                         <a class="hero-link" href="#publicReviews">ver resenhas</a>
@@ -336,7 +361,26 @@
     </div>
     {% endif %}
 
+    <div class="review-modal" id="followUserModal" hidden>
+        <div class="review-modal-backdrop" data-follow-modal-close></div>
+        <div class="review-modal-card review-modal-card--follow">
+            <div class="review-modal-head">
+                <div>
+                    <span class="card-kicker">Relações</span>
+                    <h2 id="followModalTitle">Seguindo</h2>
+                </div>
+                <button class="review-modal-close" type="button" data-follow-modal-close>&times;</button>
+            </div>
+
+            <div class="follow-modal-body">
+                <p id="followModalState" class="follow-modal-state" hidden>Carregando usuarios...</p>
+                <div id="followModalList" class="follow-modal-list" aria-live="polite"></div>
+            </div>
+        </div>
+    </div>
+
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/follow.js') }}"></script>
     <script src="{{ url_for('static', filename='js/review-interactions.js') }}"></script>
     {% if current_user.is_authenticated %}
     <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>

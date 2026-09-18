@@ -8,6 +8,7 @@ from models.review import Review
 from models.review_comment import ReviewComment
 from models.review_like import ReviewLike
 from models.user import User
+from models.user_follow import UserFollow
 from service.wishlist_service import list_public_wishlists
 
 
@@ -194,6 +195,45 @@ def _public_users_query(exclude_user_id=None):
     return query
 
 
+def count_followers(user_id):
+    return UserFollow.query.filter_by(followed_user_id=user_id).count()
+
+
+def count_following(user_id):
+    return UserFollow.query.filter_by(follower_user_id=user_id).count()
+
+
+def is_following(follower_user_id, followed_user_id):
+    if not follower_user_id or not followed_user_id:
+        return False
+    if follower_user_id == followed_user_id:
+        return False
+    return UserFollow.query.filter_by(
+        follower_user_id=follower_user_id,
+        followed_user_id=followed_user_id,
+    ).first() is not None
+
+
+def list_followers(user_id):
+    follows = (
+        UserFollow.query.filter_by(followed_user_id=user_id)
+        .order_by(UserFollow.created_at.desc())
+        .all()
+    )
+    users = [follow.follower_user for follow in follows if follow.follower_user]
+    return [_public_user_card_payload(user, external_urls=True) for user in users]
+
+
+def list_following(user_id):
+    follows = (
+        UserFollow.query.filter_by(follower_user_id=user_id)
+        .order_by(UserFollow.created_at.desc())
+        .all()
+    )
+    users = [follow.followed_user for follow in follows if follow.followed_user]
+    return [_public_user_card_payload(user, external_urls=True) for user in users]
+
+
 def list_public_users(limit=USER_DIRECTORY_LIMIT, exclude_user_id=None, external_urls=False):
     users = (
         _public_users_query(exclude_user_id=exclude_user_id)
@@ -228,6 +268,9 @@ def get_public_user_profile(
     review_count = Review.query.filter_by(user_id=user.id).count()
     public_lists = _load_public_lists(user.id)
     public_list_movie_count = sum(wishlist.get("movieCount", 0) for wishlist in public_lists)
+    follower_count = count_followers(user.id)
+    following_count = count_following(user.id)
+    is_following_current_user = bool(viewer_user_id and viewer_user_id != user.id and is_following(viewer_user_id, user.id))
 
     return {
         "id": user.id,
@@ -241,6 +284,9 @@ def get_public_user_profile(
         },
         "createdAt": _isoformat(user.created_at),
         "createdAtLabel": _date_label(user.created_at),
+        "isFollowing": is_following_current_user,
+        "followingCount": following_count,
+        "followerCount": follower_count,
         "stats": {
             "reviews": review_count,
             "ratings": _count_reviewed_movies(user.id),

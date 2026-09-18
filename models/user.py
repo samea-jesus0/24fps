@@ -54,3 +54,17 @@ class User(db.Model, UserMixin):
         cascade="all, delete-orphan",
         lazy="dynamic",
     )
+    following = db.relationship(
+        "UserFollow",
+        foreign_keys="UserFollow.follower_user_id",
+        back_populates="follower_user",
+        cascade="all, delete-orphan",
+        lazy="dynamic",
+    )
+    followers = db.relationship(
+        "UserFollow",
+        foreign_keys="UserFollow.followed_user_id",
+        back_populates="followed_user",
+        cascade="all, delete-orphan",
+        lazy="dynamic",
+    )

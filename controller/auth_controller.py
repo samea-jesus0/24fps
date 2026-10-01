@@ -29,14 +29,14 @@ def normalize_photo_position(value):
 @auth.route("/")
 def home():
     if current_user.is_authenticated:
-        return redirect(url_for("movie.index"))
+        return redirect(url_for("feed.feed"))
     return redirect(url_for("auth.login"))
 
 
 @auth.route("/cadastro", methods=["GET", "POST"])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for("movie.index"))
+        return redirect(url_for("feed.feed"))
 
     if request.method == "POST":
         nome = request.form["nome"]
@@ -95,7 +95,7 @@ def login():
 
         if user and check_password_hash(user.senha, senha):
             login_user(user)
-            return redirect(url_for("movie.index"))
+            return redirect(url_for("feed.feed"))
 
         flash("Login invalido")
 

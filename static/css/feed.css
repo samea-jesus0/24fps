@@ -1,0 +1,250 @@
+.feed-layout {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.75fr) minmax(0, 1.5fr);
+    gap: 22px;
+    padding: 28px;
+}
+
+.feed-intro {
+    align-self: start;
+    padding: 28px;
+    position: sticky;
+    top: 20px;
+}
+
+.feed-intro h1 {
+    margin: 10px 0 12px;
+    font-family: "Averia Serif Libre", Georgia, serif;
+    font-size: clamp(2rem, 4vw, 3.35rem);
+    line-height: 0.98;
+}
+
+.feed-intro p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.7;
+}
+
+.feed-intro-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.feed-panel {
+    min-width: 0;
+    padding: 24px;
+    border: 2px solid rgba(110, 91, 47, 0.14);
+    border-radius: 24px;
+    background: rgba(255, 249, 236, 0.88);
+    box-shadow: 0 18px 38px rgba(93, 72, 31, 0.10);
+}
+
+.feed-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.feed-panel-head h2 {
+    margin: 4px 0 0;
+    font-family: "Averia Serif Libre", Georgia, serif;
+    font-size: clamp(1.65rem, 3vw, 2.2rem);
+}
+
+.feed-refresh {
+    border: 2px solid rgba(95, 115, 52, 0.24);
+    border-radius: 999px;
+    padding: 9px 14px;
+    background: var(--sage);
+    color: var(--olive-dark);
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.feed-refresh:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.feed-state {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 28px;
+    border: 2px dashed rgba(110, 91, 47, 0.18);
+    border-radius: 18px;
+    color: var(--muted);
+    text-align: center;
+}
+
+.feed-state strong {
+    color: var(--ink);
+}
+
+.feed-list {
+    display: grid;
+    gap: 12px;
+}
+
+.feed-item {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 15px;
+    border: 2px solid rgba(110, 91, 47, 0.12);
+    border-radius: 18px;
+    background: rgba(255, 252, 241, 0.9);
+    transition: transform 160ms ease, border-color 160ms ease;
+}
+
+.feed-item:hover {
+    transform: translateY(-2px);
+    border-color: rgba(140, 171, 79, 0.5);
+}
+
+.feed-avatar {
+    width: 48px;
+    height: 48px;
+    overflow: hidden;
+    border-radius: 50%;
+    border: 3px solid var(--mustard);
+    background: var(--sage);
+}
+
+.feed-avatar img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.feed-item-main {
+    min-width: 0;
+}
+
+.feed-item-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 0.78rem;
+}
+
+.feed-type-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 23px;
+    height: 23px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: var(--ink);
+    font-weight: 900;
+}
+
+.feed-item-top time {
+    white-space: nowrap;
+}
+
+.feed-item-text {
+    margin: 5px 0 7px;
+    line-height: 1.45;
+    font-weight: 800;
+}
+
+.feed-item-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.feed-item-meta a {
+    color: var(--olive-dark);
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.feed-item-meta a:hover {
+    text-decoration: underline;
+}
+
+.feed-rating {
+    letter-spacing: 0.08em;
+    color: #9c7417;
+}
+
+.feed-list-name {
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--sage);
+    color: var(--olive-dark);
+    font-weight: 800;
+}
+
+.feed-action-link {
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(201, 107, 95, 0.12);
+}
+
+.feed-poster {
+    width: 48px;
+    height: 68px;
+    overflow: hidden;
+    flex: 0 0 auto;
+    border-radius: 9px;
+    border: 2px solid rgba(110, 91, 47, 0.14);
+}
+
+.feed-poster img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+@media (max-width: 900px) {
+    .feed-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .feed-intro {
+        position: static;
+    }
+}
+
+@media (max-width: 620px) {
+    .feed-layout {
+        padding: 16px;
+    }
+
+    .feed-panel,
+    .feed-intro {
+        padding: 18px;
+    }
+
+    .feed-panel-head {
+        align-items: flex-start;
+    }
+
+    .feed-item {
+        grid-template-columns: 42px minmax(0, 1fr);
+    }
+
+    .feed-avatar {
+        width: 42px;
+        height: 42px;
+    }
+
+    .feed-poster {
+        display: none;
+    }
+}

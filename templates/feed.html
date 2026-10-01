@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>24FPS | Feed</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/feed.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css') }}">
+</head>
+<body class="feed-page">
+    {% set current_avatar = current_user.foto if current_user.foto and current_user.foto != 'default.png' else 'default-avatar.svg' %}
+    <div class="page-noise" aria-hidden="true"></div>
+
+    <main class="browser-shell">
+        <header class="browser-top">
+            <div class="browser-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div class="browser-address">https://24fps.cinema/feed.com</div>
+            <div class="toolbar-utility">
+                {% include 'components/notifications.html' %}
+                <a class="utility-pill utility-pill--avatar" href="{{ url_for('perfil.perfil') }}">
+                    <img
+                        src="{{ url_for('static', filename='uploads/' + current_avatar) }}"
+                        alt="Foto de perfil"
+                        style="object-position: {{ (current_user.foto_pos_x or 50)|string }}% {{ (current_user.foto_pos_y or 50)|string }}%;">
+                    <span>minha conta</span>
+                </a>
+            </div>
+        </header>
+
+        <div class="browser-toolbar">
+            <a class="toolbar-tab" href="{{ url_for('movie.index') }}">Descobrir</a>
+            <a class="toolbar-tab is-active" href="{{ url_for('feed.feed') }}">Feed</a>
+            <a class="toolbar-tab" href="{{ url_for('catalogo.catalogo') }}">Catalogo</a>
+            <a class="toolbar-tab" href="{{ url_for('users.directory') }}">Plateia</a>
+            <a class="toolbar-tab" href="{{ url_for('perfil.perfil') }}">Perfil</a>
+            <span class="toolbar-note">Filmes ficam melhores quando a plateia compartilha.</span>
+        </div>
+
+        <section class="feed-layout">
+            <article class="panel feed-intro reveal">
+                <span class="eyebrow">Feed de atividades</span>
+                <h1>O que sua plateia anda assistindo?</h1>
+                <p>Acompanhe avaliações, resenhas e filmes adicionados às listas públicas das pessoas que você segue.</p>
+                <div class="feed-intro-actions">
+                    <a class="hero-link" href="{{ url_for('users.directory') }}">encontrar plateia</a>
+                    <a class="hero-link hero-link--primary" href="{{ url_for('perfil.perfil') }}">abrir meu perfil</a>
+                </div>
+            </article>
+
+            <section class="feed-panel" aria-live="polite">
+                <div class="feed-panel-head">
+                    <div>
+                        <span class="card-kicker">Atividades recentes</span>
+                        <h2>Da sua plateia</h2>
+                    </div>
+                    <button class="feed-refresh" type="button" data-feed-refresh>atualizar</button>
+                </div>
+
+                <div class="feed-state" data-feed-state>
+                    <strong>Carregando atividades...</strong>
+                    <span>Buscando as novidades das pessoas que você segue.</span>
+                </div>
+
+                <div class="feed-list" data-feed-list></div>
+            </section>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/feed.js') }}"></script>
+</body>
+</html>

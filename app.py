@@ -113,6 +113,7 @@ def create_app(config_overrides=None):
     from controller.catalogo_controller import catalogo_bp
     from controller.dashboard_controller import main
     from controller.user_profile_controller import users_bp
+    from controller.feed_controller import feed_bp
     from controller.review_interaction_controller import interactions_bp
     app.register_blueprint(movie_bp)
     app.register_blueprint(perfil_bp)
@@ -121,6 +122,7 @@ def create_app(config_overrides=None):
     app.register_blueprint(main)
     app.register_blueprint(users_bp)
     app.register_blueprint(interactions_bp)
+    app.register_blueprint(feed_bp)
     
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'

@@ -156,6 +156,22 @@
       </div>
     </section>
 
+    {% if current_user.is_authenticated %}
+    <section class="recommendation-board reveal reveal-delay-4" aria-labelledby="recommendationsTitle">
+      <div class="recommendation-heading">
+        <div>
+          <span class="eyebrow">curadoria 24FPS</span>
+          <h2 id="recommendationsTitle">Recomendados para você</h2>
+          <p>Filmes escolhidos a partir das suas avaliações e da sua wishlist.</p>
+        </div>
+        <button class="hero-link" type="button" data-recommendations-refresh>atualizar</button>
+      </div>
+      <div class="recommendation-grid" data-recommendations aria-live="polite">
+        <p class="recommendation-state">Buscando sugestões para o seu perfil...</p>
+      </div>
+    </section>
+    {% endif %}
+
     <section class="content-grid">
       <aside class="panel notebook-panel reveal reveal-delay-4">
         <span class="eyebrow">Watchlist</span>
@@ -189,6 +205,9 @@
   </main>
 
   <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  {% if current_user.is_authenticated %}
+  <script src="{{ url_for('static', filename='js/recommendations.js') }}"></script>
+  {% endif %}
   <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
 </body>
 

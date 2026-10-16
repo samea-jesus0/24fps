@@ -237,6 +237,24 @@ def _fetch_movie_by_id(imdb_id, source_rank=0):
     return _normalize_movie_data(data, source_rank=source_rank)
 
 
+def buscar_ids_filmes_por_termo(search_term, limit=10):
+    """Retorna IDs de filmes de uma busca OMDb, propagando falhas da API."""
+    search_term = (search_term or "").strip()
+    if not search_term:
+        return []
+
+    data = _request_search_page_cached(_get_api_key(), search_term, 1)
+    if not data or data.get("Response") == "False":
+        return []
+
+    results = data.get("Search") or []
+    return [
+        movie["imdbID"]
+        for movie in results[:max(1, min(int(limit), 10))]
+        if movie.get("imdbID")
+    ]
+
+
 def _parse_total_results(data):
     try:
         return int(data.get("totalResults", 0))

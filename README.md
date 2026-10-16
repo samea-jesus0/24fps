@@ -163,6 +163,7 @@ Volumes usados pelo Compose:
 - `/buscar` busca de filme por nome via JSON
 - `/sugestoes` sugestoes de filmes
 - `/api/movies/details` detalhes por `imdb_id` ou titulo
+- `/api/recommendations` recomendacoes personalizadas para o usuario autenticado
 - `/catalogo` pagina do catalogo
 - `/api/catalogo` dados do catalogo com filtros
 - `/perfil` perfil do usuario autenticado
@@ -181,7 +182,27 @@ Volumes usados pelo Compose:
 - `controller/resenha_controller.py` parece legado ou incompleto: o blueprint nao e registrado e ele referencia `resenha.html`, arquivo que nao existe na pasta `templates/`.
 - `debug_perfil.py` e um script auxiliar local para depuracao, nao parte do fluxo de producao.
 - O projeto depende da OMDb API para busca, sugestoes, detalhes e catalogo. Sem `API_KEY`, esses recursos falham ou retornam indisponibilidade.
-- Nao ha suite de testes automatizados no repositorio neste momento.
+- Os testes automatizados ficam em `tests/` e podem ser executados com `python -m unittest discover -s tests -v`.
+
+## Recomendacoes personalizadas
+
+A secao **Recomendados para voce** aparece na pagina Descobrir para usuarios autenticados. O endpoint `/api/recommendations` combina os generos das resenhas (notas altas aumentam afinidade e notas baixas reduzem), os generos resolvidos dos filmes nas wishlists do proprio usuario e a nota IMDb como sinal de popularidade. Filmes ja avaliados ou presentes em qualquer wishlist do usuario sao excluidos. Usuarios sem perfil recebem uma selecao baseada nos filmes em destaque do catalogo, ordenada pela nota IMDb disponivel.
+
+Para cada genero do candidato, a afinidade das resenhas usa `(nota - 3) / 2` e converte a media assinada para a escala 0-1; generos sem avaliacao ficam neutros. O sinal da wishlist e a proporcao de generos do candidato encontrados nos filmes desejados. A popularidade e a nota IMDb dividida por 10. A pontuacao final e a media ponderada dos sinais disponiveis, com pesos re-normalizados quando o usuario ainda nao tem algum desses dados.
+
+O botao de atualizar gira uma janela pelos candidatos mais bem pontuados (ate duas vezes a quantidade exibida), mantendo as mesmas metricas e os filtros de filmes avaliados/listados. A selecao inicial mostra os primeiros colocados; as atualizacoes percorrem o restante do conjunto relevante. Quando o conjunto tem mais filmes elegiveis do que o tamanho da lista, a proxima atualizacao troca os titulos exibidos.
+
+Os pesos podem ser ajustados pela configuracao `RECOMMENDATION_WEIGHTS`:
+
+```python
+RECOMMENDATION_WEIGHTS = {
+    "reviews": 0.60,
+    "wishlist": 0.25,
+    "popularity": 0.15,
+}
+```
+
+O historico de pesquisas nao e usado: a tabela `pesquisas` atual nao associa os registros a um usuario nem guarda consentimento, entao nao permite personalizacao segura. As recomendacoes sao recalculadas em cada requisicao e dependem da OMDb para metadados e candidatos.
 
 ## Sanidade Verificada
 

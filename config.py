@@ -26,4 +26,8 @@ class Config:
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
     OMDB_API_KEY = api_key
-
+    RECOMMENDATION_WEIGHTS = {
+        "reviews": 0.60,
+        "wishlist": 0.25,
+        "popularity": 0.15,
+    }

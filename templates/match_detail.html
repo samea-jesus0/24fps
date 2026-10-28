@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if match %}Match com {{ match.name }}{% else %}Match não encontrado{% endif %} | 24FPS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/matches.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css') }}">
+</head>
+<body class="matches-page">
+    {% set current_avatar = current_user.foto if current_user.foto and current_user.foto != 'default.png' else 'default-avatar.svg' %}
+    <div class="page-noise" aria-hidden="true"></div>
+    <main class="browser-shell">
+        <header class="browser-top">
+            <div class="browser-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div class="browser-address">https://24fps.cinema/matches{% if match %}/{{ match.userId }}{% endif %}</div>
+            <div class="toolbar-utility">
+                {% include 'components/notifications.html' %}
+                <a class="utility-pill utility-pill--avatar" href="{{ url_for('perfil.perfil') }}">
+                    <img src="{{ url_for('static', filename='uploads/' + current_avatar) }}" alt="Foto de perfil">
+                    <span>minha conta</span>
+                </a>
+            </div>
+        </header>
+        <nav class="browser-toolbar" aria-label="Navegação principal">
+            <a class="toolbar-tab" href="{{ url_for('movie.index') }}">Descobrir</a>
+            <a class="toolbar-tab" href="{{ url_for('feed.feed') }}">Feed</a>
+            <a class="toolbar-tab" href="{{ url_for('catalogo.catalogo') }}">Catálogo</a>
+            <a class="toolbar-tab" href="{{ url_for('users.directory') }}">Plateia</a>
+            <a class="toolbar-tab is-active" href="{{ url_for('matches.match_page') }}">Matches</a>
+            <a class="toolbar-tab" href="{{ url_for('perfil.perfil') }}">Perfil</a>
+            <span class="toolbar-note">Detalhes do match</span>
+        </nav>
+
+        <section class="match-detail-content">
+            {% if error %}
+            <article class="panel matches-empty">
+                <span class="eyebrow">Perfil indisponível</span>
+                <h1>{{ error }}</h1>
+                <a class="hero-link hero-link--primary" href="{{ url_for('matches.match_page') }}">voltar para matches</a>
+            </article>
+            {% else %}
+            <header class="panel match-detail-header">
+                <div class="match-detail-identity">
+                    <img class="match-card__avatar" src="{{ match.avatarUrl }}" alt="Foto de {{ match.name }}">
+                    <div>
+                        <span class="eyebrow">Compatibilidade cinematográfica</span>
+                        <h1>{{ match.name }}</h1>
+                    </div>
+                </div>
+                {% if match.hasComparisonData %}
+                <div class="match-detail-score">
+                    <strong>{{ match.compatibility }}%</strong>
+                    <span>compatível</span>
+                    <small>Confiança {{ {'low': 'baixa', 'medium': 'média', 'high': 'alta'}[match.confidence] }} · {{ match.commonMoviesCount }} filmes em comum</small>
+                </div>
+                <p class="match-detail-message">{{ match.message }}</p>
+                {% else %}
+                <p class="match-detail-message">{{ match.message }}</p>
+                {% endif %}
+            </header>
+
+            {% if match.hasComparisonData %}
+            <section class="match-breakdown" aria-label="Componentes da compatibilidade">
+                <article class="panel match-breakdown-card">
+                    <span>Notas em comum</span>
+                    <strong>{{ match.components.ratings if match.components.ratings is not none else '—' }}{% if match.components.ratings is not none %}%{% endif %}</strong>
+                    <small>{{ match.commonRatedMoviesCount }} avaliações comparadas · nota bruta {{ match.components.ratingsRaw if match.components.ratingsRaw is not none else '—' }}{% if match.components.ratingsRaw is not none %}%{% endif %}</small>
+                </article>
+                <article class="panel match-breakdown-card">
+                    <span>Gêneros</span>
+                    <strong>{{ match.components.genres if match.components.genres is not none else '—' }}{% if match.components.genres is not none %}%{% endif %}</strong>
+                    <small>Preferências calculadas pela frequência no histórico</small>
+                </article>
+                <article class="panel match-breakdown-card">
+                    <span>Filmes assistidos</span>
+                    <strong>{{ match.components.movies if match.components.movies is not none else '—' }}{% if match.components.movies is not none %}%{% endif %}</strong>
+                    <small>{{ match.commonMoviesCount }} filmes em comum</small>
+                </article>
+            </section>
+
+            <section class="panel match-detail-section">
+                <span class="card-kicker">Preferências</span>
+                <h2>Gêneros em comum</h2>
+                {% if match.commonGenres %}
+                <ul class="match-genre-list">
+                    {% for genre in match.commonGenres %}<li>{{ genre }}</li>{% endfor %}
+                </ul>
+                {% else %}
+                <p>Os históricos ainda não têm gêneros em comum registrados.</p>
+                {% endif %}
+            </section>
+
+            <section class="panel match-detail-section">
+                <span class="card-kicker">Histórico compartilhado</span>
+                <h2>Filmes em comum</h2>
+                {% if match.commonMovies %}
+                <ul class="common-movie-list">
+                    {% for movie in match.commonMovies %}
+                    <li>
+                        <strong>{{ movie.title }}</strong>
+                        <span>Você: {% if movie.currentUserRating is not none %}{{ movie.currentUserRating }}/5{% else %}sem nota{% endif %}</span>
+                        <span>{{ match.name }}: {% if movie.otherUserRating is not none %}{{ movie.otherUserRating }}/5{% else %}sem nota{% endif %}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p>Vocês ainda não registraram resenhas do mesmo filme.</p>
+                {% endif %}
+            </section>
+            {% endif %}
+
+            <div class="match-detail-actions">
+                <a class="hero-link" href="{{ url_for('users.public_profile', user_id=match.userId) }}">ver perfil público</a>
+                <a class="hero-link hero-link--primary" href="{{ url_for('matches.match_page') }}">voltar para matches</a>
+            </div>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matches cinematográficos | 24FPS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/matches.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css') }}">
+</head>
+<body class="matches-page">
+    {% set current_avatar = current_user.foto if current_user.foto and current_user.foto != 'default.png' else 'default-avatar.svg' %}
+    <div class="page-noise" aria-hidden="true"></div>
+
+    <main class="browser-shell">
+        <header class="browser-top">
+            <div class="browser-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div class="browser-address">https://24fps.cinema/matches</div>
+            <div class="toolbar-utility">
+                {% include 'components/notifications.html' %}
+                <a class="utility-pill utility-pill--avatar" href="{{ url_for('perfil.perfil') }}">
+                    <img src="{{ url_for('static', filename='uploads/' + current_avatar) }}" alt="Foto de perfil">
+                    <span>minha conta</span>
+                </a>
+            </div>
+        </header>
+
+        <nav class="browser-toolbar" aria-label="Navegação principal">
+            <a class="toolbar-tab" href="{{ url_for('movie.index') }}">Descobrir</a>
+            <a class="toolbar-tab" href="{{ url_for('feed.feed') }}">Feed</a>
+            <a class="toolbar-tab" href="{{ url_for('catalogo.catalogo') }}">Catálogo</a>
+            <a class="toolbar-tab" href="{{ url_for('users.directory') }}">Plateia</a>
+            <a class="toolbar-tab is-active" href="{{ url_for('matches.match_page') }}">Matches</a>
+            <a class="toolbar-tab" href="{{ url_for('perfil.perfil') }}">Perfil</a>
+            <span class="toolbar-note">Encontre pessoas que assistem como você.</span>
+        </nav>
+
+        <section class="matches-content">
+            <header class="panel matches-intro reveal">
+                <span class="eyebrow">Match cinematográfico</span>
+                <h1>Encontre pessoas que assistem como você.</h1>
+                <p>Comparamos resenhas, notas e os gêneros presentes no histórico público de cada perfil.</p>
+            </header>
+
+            {% if not has_history %}
+            <section class="panel matches-empty reveal" aria-live="polite">
+                <span class="card-kicker">Seu primeiro passo</span>
+                <h2>Vamos conhecer seu gosto por filmes?</h2>
+                <p>Você ainda precisa registrar algumas resenhas para encontrarmos pessoas com gostos parecidos.</p>
+                <a class="hero-link hero-link--primary" href="{{ url_for('movie.index') }}">escrever uma resenha</a>
+            </section>
+            {% elif not matches %}
+            <section class="panel matches-empty reveal" aria-live="polite">
+                <span class="card-kicker">Por enquanto</span>
+                <h2>Ainda não há perfis para comparar.</h2>
+                <p>Quando outras pessoas publicarem resenhas, os matches aparecem aqui.</p>
+                <a class="hero-link hero-link--primary" href="{{ url_for('users.directory') }}">explorar a plateia</a>
+            </section>
+            {% else %}
+            <section class="matches-results" aria-labelledby="matchesTitle">
+                <div class="matches-results-heading">
+                    <div>
+                        <span class="eyebrow">Sua plateia</span>
+                        <h2 id="matchesTitle">Perfis compatíveis</h2>
+                    </div>
+                    <p>Ordenados pela compatibilidade calculada com os dados disponíveis.</p>
+                </div>
+
+                <div class="match-grid">
+                    {% for match in matches %}
+                    <article class="panel match-card">
+                        <a class="match-card__identity" href="{{ match.profileUrl }}">
+                            <img class="match-card__avatar" src="{{ match.avatarUrl }}" alt="Foto de {{ match.name }}" loading="lazy">
+                            <span>
+                                <strong>{{ match.name }}</strong>
+                                <small>@{{ match.username }}</small>
+                            </span>
+                        </a>
+
+                        <div class="match-card__score">
+                            <strong>{{ match.compatibility }}%</strong>
+                            <span>compatível</span>
+                            <small>Confiança: {{ {'low': 'baixa', 'medium': 'média', 'high': 'alta'}[match.confidence] }}</small>
+                        </div>
+
+                        <div class="match-card__facts">
+                            <span>{{ match.commonMoviesCount }} filmes em comum</span>
+                            {% if match.commonGenres %}
+                            <p><b>Gêneros em comum:</b> {{ match.commonGenres|join(' · ') }}</p>
+                            {% else %}
+                            <p>Sem gêneros em comum identificados.</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="match-card__actions">
+                            <a class="hero-link hero-link--primary" href="{{ url_for('matches.match_detail', user_id=match.userId) }}">ver match</a>
+                            <a class="hero-link" href="{{ match.profileUrl }}">ver perfil</a>
+                            <button
+                                class="follow-toggle-button match-follow-button {% if match.isFollowing %}is-following{% endif %}"
+                                type="button"
+                                data-follow-toggle
+                                data-user-id="{{ match.userId }}"
+                                data-authenticated="true"
+                                data-is-following="{{ 'true' if match.isFollowing else 'false' }}"
+                                aria-pressed="{{ 'true' if match.isFollowing else 'false' }}">
+                                {{ 'Seguindo' if match.isFollowing else 'Seguir' }}
+                            </button>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+        </section>
+    </main>
+    <script src="{{ url_for('static', filename='js/follow.js') }}"></script>
+</body>
+</html>

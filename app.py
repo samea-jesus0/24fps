@@ -115,6 +115,11 @@ def create_app(config_overrides=None):
     from controller.user_profile_controller import users_bp
     from controller.feed_controller import feed_bp
     from controller.review_interaction_controller import interactions_bp
+<<<<<<< HEAD
+=======
+    from controller.recommendation_controller import recommendations_bp
+    from controller.match_controller import matches_bp
+>>>>>>> 7b48dbd (Funcionalidade 15, adicionando Match de Perfil entre usuarios.)
     app.register_blueprint(movie_bp)
     app.register_blueprint(perfil_bp)
     app.register_blueprint(auth)
@@ -123,6 +128,11 @@ def create_app(config_overrides=None):
     app.register_blueprint(users_bp)
     app.register_blueprint(interactions_bp)
     app.register_blueprint(feed_bp)
+<<<<<<< HEAD
+=======
+    app.register_blueprint(recommendations_bp)
+    app.register_blueprint(matches_bp)
+>>>>>>> 7b48dbd (Funcionalidade 15, adicionando Match de Perfil entre usuarios.)
     
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'

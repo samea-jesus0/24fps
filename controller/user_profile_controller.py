@@ -14,6 +14,7 @@ from service.user_profile_service import (
     search_public_users,
 )
 from service.user_statistics_service import get_public_user_statistics
+from service.match_service import get_match_details
 from extensions import db
 
 
@@ -111,6 +112,9 @@ def public_profile(user_id):
     if not profile:
         return _profile_not_found_response(wants_json)
 
+    if viewer_user_id and viewer_user_id != user_id:
+        profile["match"] = get_match_details(viewer_user_id, user_id)
+
     if wants_json:
         return jsonify(profile)
 
@@ -137,6 +141,8 @@ def public_profile_api(user_id):
     )
     if not profile:
         return jsonify({"erro": "Usuario nao encontrado"}), 404
+    if viewer_user_id and viewer_user_id != user_id:
+        profile["match"] = get_match_details(viewer_user_id, user_id)
     return jsonify(profile)
 
 

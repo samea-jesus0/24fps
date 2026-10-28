@@ -20,6 +20,7 @@
         href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/stylePerfil.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/matches.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css') }}">
 </head>
 
@@ -45,6 +46,7 @@
             <nav class="profile-nav">
                 <a class="profile-tab" href="{{ url_for('movie.index') }}">Descobrir</a>
                 {% if current_user.is_authenticated %}<a class="profile-tab" href="{{ url_for('feed.feed') }}">Feed</a>{% endif %}
+                {% if current_user.is_authenticated %}<a class="profile-tab" href="{{ url_for('matches.match_page') }}">Matches</a>{% endif %}
                 <a class="profile-tab" href="{{ url_for('catalogo.catalogo') if current_user.is_authenticated else url_for('auth.login') }}">Catalogo</a>
                 <a class="profile-tab is-active" href="{{ url_for('users.directory') }}">Plateia</a>
                 {% if current_user.is_authenticated %}
@@ -99,6 +101,26 @@
                         <span>Entrou em {{ profile.createdAtLabel }}</span>
                         <span>{{ profile.stats.reviews }} resenhas publicadas</span>
                     </div>
+
+                    {% if profile.match %}
+                    <section class="profile-match-card" aria-label="Compatibilidade cinematográfica">
+                        <span class="card-kicker">Compatibilidade</span>
+                        {% if profile.match.hasComparisonData %}
+                        <div class="profile-match-card__score">
+                            <strong>{{ profile.match.compatibility }}%</strong>
+                            <span>compatível · confiança {{ {'low': 'baixa', 'medium': 'média', 'high': 'alta'}[profile.match.confidence] }}</span>
+                        </div>
+                        <p>{{ profile.match.message }}</p>
+                        <div class="profile-match-card__meta">
+                            <span>{{ profile.match.commonMoviesCount }} filmes em comum</span>
+                            {% if profile.match.commonGenres %}<span>Gêneros: {{ profile.match.commonGenres|join(' · ') }}</span>{% endif %}
+                        </div>
+                        {% else %}
+                        <p>{{ profile.match.message }}</p>
+                        {% endif %}
+                        <a class="hero-link" href="{{ url_for('matches.match_detail', user_id=profile.id) }}">ver detalhes do match</a>
+                    </section>
+                    {% endif %}
 
                     {% if current_user.is_authenticated and current_user.id != profile.id %}
                     <div class="profile-follow-actions">

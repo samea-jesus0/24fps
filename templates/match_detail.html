@@ -74,10 +74,10 @@
                 <article class="panel match-breakdown-card">
                     <span>Gêneros</span>
                     <strong>{{ match.components.genres if match.components.genres is not none else '—' }}{% if match.components.genres is not none %}%{% endif %}</strong>
-                    <small>Preferências calculadas pela frequência no histórico</small>
+                    <small>Preferências calculadas pela frequência nas resenhas</small>
                 </article>
                 <article class="panel match-breakdown-card">
-                    <span>Filmes assistidos</span>
+                    <span>Filmes em comum</span>
                     <strong>{{ match.components.movies if match.components.movies is not none else '—' }}{% if match.components.movies is not none %}%{% endif %}</strong>
                     <small>{{ match.commonMoviesCount }} filmes em comum</small>
                 </article>
@@ -91,25 +91,25 @@
                     {% for genre in match.commonGenres %}<li>{{ genre }}</li>{% endfor %}
                 </ul>
                 {% else %}
-                <p>Os históricos ainda não têm gêneros em comum registrados.</p>
+                <p>As resenhas ainda não têm gêneros em comum registrados.</p>
                 {% endif %}
             </section>
 
             <section class="panel match-detail-section">
-                <span class="card-kicker">Histórico compartilhado</span>
+                <span class="card-kicker">Filmes compartilhados</span>
                 <h2>Filmes em comum</h2>
                 {% if match.commonMovies %}
                 <ul class="common-movie-list">
                     {% for movie in match.commonMovies %}
                     <li>
                         <strong>{{ movie.title }}</strong>
-                        <span>Você: {% if movie.currentUserRating is not none %}{{ movie.currentUserRating }}/5{% else %}sem nota{% endif %}</span>
-                        <span>{{ match.name }}: {% if movie.otherUserRating is not none %}{{ movie.otherUserRating }}/5{% else %}sem nota{% endif %}</span>
+                        <span>Você: {% if movie.currentUserRating is not none %}{{ movie.currentUserRating }}/5{% elif movie.currentUserInList %}em lista pública{% else %}sem nota{% endif %}</span>
+                        <span>{{ match.name }}: {% if movie.otherUserRating is not none %}{{ movie.otherUserRating }}/5{% elif movie.otherUserInList %}em lista pública{% else %}sem nota{% endif %}</span>
                     </li>
                     {% endfor %}
                 </ul>
                 {% else %}
-                <p>Vocês ainda não registraram resenhas do mesmo filme.</p>
+                <p>Vocês ainda não registraram resenhas nem adicionaram filmes em comum a listas públicas.</p>
                 {% endif %}
             </section>
             {% endif %}

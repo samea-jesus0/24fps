@@ -74,6 +74,20 @@ class MatchesTestCase(unittest.TestCase):
             self._add_review(self.current_id, title, movie_id, genre, current_rating, index)
             self._add_review(self.other_id, title, movie_id, genre, other_rating, index)
 
+    def _add_wishlist_movie(self, user_id, title, movie_id, is_public=True):
+        wishlist = Wishlist(user_id=user_id, titulo="Lista de filmes", is_public=is_public)
+        db.session.add(wishlist)
+        db.session.flush()
+        db.session.add(
+            WishlistMovie(
+                wishlist_id=wishlist.id,
+                movie_key=f"imdb:{movie_id.lower()}",
+                filme_id=movie_id,
+                filme_titulo=title,
+            )
+        )
+        db.session.commit()
+
     def _details(self, other_id=None):
         with self.app.test_request_context():
             return get_match_details(self.current_id, other_id or self.other_id)
@@ -279,28 +293,43 @@ class MatchesTestCase(unittest.TestCase):
                     event.remove(db.engine, "before_cursor_execute", record_statement)
 
         self.assertEqual(len(matches), 6)
-        self.assertEqual(len(statements), 3)
+        self.assertEqual(len(statements), 4)
 
     def test_private_wishlists_do_not_affect_match_data(self):
         with self.app.app_context():
             self._add_review(self.current_id, "Dune", "tt-dune", "Sci-Fi", 5)
             self._add_review(self.other_id, "Arrival", "tt-arrival", "Drama", 4)
-            private_list = Wishlist(user_id=self.current_id, titulo="Minha lista privada", is_public=False)
-            db.session.add(private_list)
-            db.session.flush()
-            db.session.add(
-                WishlistMovie(
-                    wishlist_id=private_list.id,
-                    movie_key="imdb:tt-arrival",
-                    filme_id="tt-arrival",
-                    filme_titulo="Arrival",
-                )
-            )
-            db.session.commit()
+            self._add_wishlist_movie(self.current_id, "Arrival", "tt-arrival", is_public=False)
             details = self._details()
 
         self.assertEqual(details["commonMoviesCount"], 0)
         self.assertEqual(details["components"]["movies"], 0)
+
+    def test_matching_public_wishlist_movies_increase_compatibility(self):
+        with self.app.app_context():
+            self._add_review(self.current_id, "Dune", "tt-dune", "Sci-Fi", 5)
+            self._add_review(self.other_id, "Arrival", "tt-arrival", "Drama", 1)
+            self._add_wishlist_movie(self.current_id, "Parasite", "tt-parasite")
+            self._add_wishlist_movie(self.other_id, "Parasite", "tt-parasite")
+            details = self._details()
+
+        self.assertGreater(details["compatibility"], 0)
+        self.assertEqual(details["commonMoviesCount"], 1)
+        self.assertEqual(details["commonMovies"][0]["title"], "Parasite")
+        self.assertIsNone(details["commonMovies"][0]["currentUserRating"])
+        self.assertIsNone(details["commonMovies"][0]["otherUserRating"])
+
+    def test_public_wishlists_can_provide_match_history_without_reviews(self):
+        with self.app.app_context():
+            self._add_wishlist_movie(self.current_id, "Parasite", "tt-parasite")
+            self._add_wishlist_movie(self.other_id, "Parasite", "tt-parasite")
+            details = self._details()
+            with self.app.test_request_context():
+                matches = get_user_matches(self.current_id)
+
+        self.assertTrue(details["hasComparisonData"])
+        self.assertEqual(details["commonMoviesCount"], 1)
+        self.assertEqual([match["userId"] for match in matches], [self.other_id])
 
     def test_genre_names_are_case_and_whitespace_insensitive(self):
         with self.app.app_context():

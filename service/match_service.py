@@ -1,4 +1,4 @@
-"""Compatibility scores built only from public review history already in the database."""
+"""Compatibility scores from review history and public wishlists."""
 
 from collections import Counter, defaultdict
 from math import sqrt
@@ -10,12 +10,14 @@ from extensions import db
 from models.review import Review
 from models.user import User
 from models.user_follow import UserFollow
+from models.wishlist import Wishlist
+from models.wishlist_movie import WishlistMovie
 from service.user_statistics_service import _movie_key_from_values
 
 
 # These weights express the intended importance when each signal is available.
 COMPONENT_WEIGHTS = {"ratings": 0.60, "genres": 0.30, "movies": 0.10}
-# One to four shared reviewed movies is a low-confidence sample; 5-14 is medium;
+# One to four shared movies is a low-confidence sample; 5-14 is medium;
 # 15 or more is high. Rating similarity itself reaches full weight at five shared
 # positive ratings so one lucky match cannot produce a 100% overall score.
 LOW_CONFIDENCE_MAX = 4
@@ -95,14 +97,33 @@ def _unique_movies(reviews):
                 "title": review.filme_titulo or "Filme sem título",
                 "rating": _safe_rating(review.nota),
                 "genres": candidate_genres,
+                "in_public_list": False,
             }
         elif not existing["genres"] and candidate_genres:
             existing["genres"] = candidate_genres
     return movies
 
 
-def _user_movie_data(reviews):
+def _user_movie_data(reviews, wishlist_movies=()):
     movies = _unique_movies(reviews)
+    for wishlist_movie in wishlist_movies:
+        movie_key = _movie_key_from_values(wishlist_movie.filme_id, wishlist_movie.filme_titulo)
+        if not movie_key or movie_key == "title:":
+            continue
+
+        movie = movies.get(movie_key)
+        if movie is None:
+            movies[movie_key] = {
+                "key": movie_key,
+                "movie_id": wishlist_movie.filme_id,
+                "title": wishlist_movie.filme_titulo or "Filme sem título",
+                "rating": None,
+                "genres": [],
+                "in_public_list": True,
+            }
+        else:
+            movie["in_public_list"] = True
+
     genre_counts = Counter()
     genre_labels = {}
 
@@ -207,6 +228,8 @@ def _compatibility(current_data, other_data):
                 # Zero means no rating in this app; expose it as null in comparisons.
                 "currentUserRating": current_movie["rating"],
                 "otherUserRating": other_movie["rating"],
+                "currentUserInList": current_movie["in_public_list"],
+                "otherUserInList": other_movie["in_public_list"],
             }
         )
     common_movie_details.sort(key=lambda movie: (movie["title"] or "").casefold())
@@ -230,7 +253,7 @@ def _compatibility(current_data, other_data):
         "otherUserHasHistory": bool(other_movies),
     }
     if not has_history:
-        result["message"] = "Ainda não há histórico de resenhas suficiente para comparar os perfis."
+        result["message"] = "Ainda não há histórico de filmes ou listas públicas suficiente para comparar os perfis."
     elif result["compatibility"] >= 85:
         result["message"] = "Vocês têm gostos cinematográficos muito parecidos."
     elif result["compatibility"] >= 70:
@@ -242,10 +265,11 @@ def _compatibility(current_data, other_data):
     return result
 
 
-def _load_review_data(user_ids):
+def _load_user_movie_data(user_ids):
     grouped_reviews = defaultdict(list)
+    grouped_wishlist_movies = defaultdict(list)
     if not user_ids:
-        return grouped_reviews
+        return {}
 
     reviews = (
         Review.query.options(
@@ -266,7 +290,26 @@ def _load_review_data(user_ids):
     )
     for review in reviews:
         grouped_reviews[review.user_id].append(review)
-    return {user_id: _user_movie_data(user_reviews) for user_id, user_reviews in grouped_reviews.items()}
+
+    wishlist_movies = (
+        db.session.query(Wishlist.user_id, WishlistMovie)
+        .join(WishlistMovie, WishlistMovie.wishlist_id == Wishlist.id)
+        .filter(
+            Wishlist.user_id.in_(user_ids),
+            Wishlist.is_public.is_(True),
+        )
+        .all()
+    )
+    for user_id, wishlist_movie in wishlist_movies:
+        grouped_wishlist_movies[user_id].append(wishlist_movie)
+
+    return {
+        user_id: _user_movie_data(
+            grouped_reviews[user_id],
+            grouped_wishlist_movies[user_id],
+        )
+        for user_id in set(grouped_reviews) | set(grouped_wishlist_movies)
+    }
 
 
 def _public_user_data(user):
@@ -280,15 +323,15 @@ def _public_user_data(user):
 
 
 def _build_user_matches(user_id, limit=MATCHES_LIMIT):
-    """Return matches and the current user's history flag with batched queries."""
+    """Return matches and the current user's movie-history flag with batched queries."""
     users = User.query.filter(User.id != user_id).order_by(User.id.asc()).all()
     candidate_ids = [user.id for user in users]
-    review_data = _load_review_data([user_id, *candidate_ids])
-    current_data = review_data.get(user_id, _user_movie_data([]))
+    user_data = _load_user_movie_data([user_id, *candidate_ids])
+    current_data = user_data.get(user_id, _user_movie_data([]))
     if not current_data["movies"]:
         return [], False
 
-    users_with_history = [user for user in users if review_data.get(user.id, {}).get("movies")]
+    users_with_history = [user for user in users if user_data.get(user.id, {}).get("movies")]
     if not users_with_history:
         return [], True
 
@@ -304,7 +347,7 @@ def _build_user_matches(user_id, limit=MATCHES_LIMIT):
 
     matches = []
     for user in users_with_history:
-        result = _compatibility(current_data, review_data[user.id])
+        result = _compatibility(current_data, user_data[user.id])
         matches.append(
             {
                 **_public_user_data(user),
@@ -334,24 +377,24 @@ def _build_user_matches(user_id, limit=MATCHES_LIMIT):
 
 
 def get_user_matches(user_id, limit=MATCHES_LIMIT):
-    """Return the best data-backed matches using batched user/review/follow queries."""
+    """Return data-backed matches using batched user, review, wishlist, and follow queries."""
     matches, _ = _build_user_matches(user_id, limit=limit)
     return matches
 
 
 def get_match_page_data(user_id, limit=MATCHES_LIMIT):
-    """Return page results and whether the signed-in user has usable movie history."""
+    """Return page results and whether the signed-in user has review or public-list history."""
     matches, has_history = _build_user_matches(user_id, limit=limit)
     return {"matches": matches, "hasHistory": has_history}
 
 
 def get_match_details(current_user_id, other_user_id):
-    """Return one public-history comparison, or None when the other user is missing."""
+    """Return one comparison based on reviews and public lists, or None for a missing user."""
     other_user = db.session.get(User, other_user_id)
     if not other_user:
         return None
 
-    current_data_by_id = _load_review_data([current_user_id, other_user_id])
+    current_data_by_id = _load_user_movie_data([current_user_id, other_user_id])
     current_data = current_data_by_id.get(current_user_id, _user_movie_data([]))
     other_data = current_data_by_id.get(other_user_id, _user_movie_data([]))
     result = _compatibility(current_data, other_data)

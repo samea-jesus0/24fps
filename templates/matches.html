@@ -42,21 +42,21 @@
             <header class="panel matches-intro reveal">
                 <span class="eyebrow">Match cinematográfico</span>
                 <h1>Encontre pessoas que assistem como você.</h1>
-                <p>Comparamos resenhas, notas e os gêneros presentes no histórico público de cada perfil.</p>
+                <p>Comparamos resenhas, notas, gêneros e filmes em listas públicas.</p>
             </header>
 
             {% if not has_history %}
             <section class="panel matches-empty reveal" aria-live="polite">
                 <span class="card-kicker">Seu primeiro passo</span>
                 <h2>Vamos conhecer seu gosto por filmes?</h2>
-                <p>Você ainda precisa registrar algumas resenhas para encontrarmos pessoas com gostos parecidos.</p>
+                <p>Registre resenhas ou adicione filmes a uma lista pública para encontrarmos pessoas com gostos parecidos.</p>
                 <a class="hero-link hero-link--primary" href="{{ url_for('movie.index') }}">escrever uma resenha</a>
             </section>
             {% elif not matches %}
             <section class="panel matches-empty reveal" aria-live="polite">
                 <span class="card-kicker">Por enquanto</span>
                 <h2>Ainda não há perfis para comparar.</h2>
-                <p>Quando outras pessoas publicarem resenhas, os matches aparecem aqui.</p>
+                <p>Quando outras pessoas publicarem resenhas ou adicionarem filmes a listas públicas, os matches aparecem aqui.</p>
                 <a class="hero-link hero-link--primary" href="{{ url_for('users.directory') }}">explorar a plateia</a>
             </section>
             {% else %}

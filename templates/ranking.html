@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>24FPS | Ranking da comunidade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ranking.css') }}">
+    {% if current_user.is_authenticated %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css') }}">
+    {% endif %}
+</head>
+
+<body class="ranking-page">
+    {% set current_avatar = current_user.foto if current_user.is_authenticated and current_user.foto and current_user.foto != 'default.png' else 'default-avatar.svg' %}
+    <div class="page-noise" aria-hidden="true"></div>
+
+    <main class="browser-shell ranking-shell">
+        <header class="browser-top">
+            <div class="browser-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div class="browser-address">https://24fps.cinema/ranking</div>
+            <div class="toolbar-utility">
+                {% if current_user.is_authenticated %}
+                {% include 'components/notifications.html' %}
+                <a class="utility-pill utility-pill--avatar" href="{{ url_for('perfil.perfil') }}">
+                    <img src="{{ url_for('static', filename='uploads/' + current_avatar) }}" alt="Foto de perfil">
+                    <span>minha conta</span>
+                </a>
+                {% else %}
+                <a class="utility-pill" href="{{ url_for('auth.login') }}">login</a>
+                <a class="utility-pill utility-pill--accent" href="{{ url_for('auth.register') }}">cadastro</a>
+                {% endif %}
+            </div>
+        </header>
+
+        <nav class="browser-toolbar" aria-label="Navegação principal">
+            <a class="toolbar-tab" href="{{ url_for('movie.index') }}">Descobrir</a>
+            {% if current_user.is_authenticated %}
+            <a class="toolbar-tab" href="{{ url_for('feed.feed') }}">Feed</a>
+            <a class="toolbar-tab" href="{{ url_for('matches.match_page') }}">Matches</a>
+            {% endif %}
+            <a class="toolbar-tab" href="{{ url_for('catalogo.catalogo') if current_user.is_authenticated else url_for('auth.login') }}">Catálogo</a>
+            <a class="toolbar-tab" href="{{ url_for('users.directory') }}">Plateia</a>
+            <a class="toolbar-tab is-active" href="{{ url_for('ranking.ranking_page') }}" aria-current="page">Ranking</a>
+            <a class="toolbar-tab" href="{{ url_for('perfil.perfil') if current_user.is_authenticated else url_for('auth.login') }}">Perfil</a>
+            <span class="toolbar-note">Os favoritos da comunidade 24FPS</span>
+        </nav>
+
+        <section class="ranking-content" aria-labelledby="rankingTitle">
+            <header class="panel ranking-intro reveal">
+                <div>
+                    <span class="eyebrow">TOP 5 DA COMUNIDADE</span>
+                    <h1 id="rankingTitle">Os filmes favoritos dos usuários do 24FPS.</h1>
+                    <p>Notas e avaliações registradas pela comunidade, reunidas em um só lugar.</p>
+                </div>
+                <div class="ranking-intro-mark" aria-hidden="true">24<span>FPS</span></div>
+            </header>
+
+            <p class="ranking-state" data-ranking-state role="status" aria-live="polite">
+                <span class="loading-badge">carregando ranking</span>
+                <span>Buscando as avaliações da comunidade...</span>
+            </p>
+
+            <p class="ranking-note" data-ranking-note hidden></p>
+
+            <section class="ranking-section" aria-labelledby="podiumTitle">
+                <div class="ranking-section-heading">
+                    <span class="eyebrow">mais bem avaliados</span>
+                    <h2 id="podiumTitle">O pódio</h2>
+                </div>
+                <div class="ranking-podium" data-ranking-podium data-poster-fallback="{{ url_for('static', filename='img/default-poster.svg') }}"></div>
+            </section>
+
+            <section class="ranking-section ranking-rest-section" aria-labelledby="restTitle" data-ranking-rest-section hidden>
+                <div class="ranking-section-heading">
+                    <span class="eyebrow">a plateia também escolheu</span>
+                    <h2 id="restTitle">Em seguida</h2>
+                </div>
+                <ol class="ranking-list" data-ranking-list start="4"></ol>
+            </section>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/ranking.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
+</body>
+
+</html>

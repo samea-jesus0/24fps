@@ -211,6 +211,37 @@ async function buscarFilme() {
     }
 }
 
+async function buscarDetalheFilme(imdbId, titulo) {
+    const resultado = document.getElementById("resultado");
+    if (!resultado) {
+        return;
+    }
+
+    renderLoadingState(resultado);
+
+    try {
+        const params = new URLSearchParams({ imdb_id: imdbId, titulo });
+        const response = await fetch(`${PUBLIC_MOVIE_DETAILS_API}?${params.toString()}`);
+        const data = await response.json();
+        if (!response.ok) {
+            renderErrorState(
+                resultado,
+                data.erro || "Nao foi possivel encontrar o filme",
+                "Tente abrir a ficha novamente em instantes."
+            );
+            return;
+        }
+
+        resultado.innerHTML = renderMovieResult(data, titulo || data.titulo || "Filme");
+    } catch (error) {
+        renderErrorState(
+            resultado,
+            "Erro ao buscar o filme",
+            "Verifique sua conexao ou tente novamente em instantes."
+        );
+    }
+}
+
 function redirecionar_login() {
     window.location.href = "/login";
 }
@@ -1927,6 +1958,18 @@ document.addEventListener("DOMContentLoaded", () => {
             buscarFilme();
         });
     });
+
+    const query = new URLSearchParams(window.location.search);
+    const requestedTitle = query.get("titulo") || "";
+    const requestedMovieId = query.get("imdb_id") || "";
+    if (requestedTitle && movieInput) {
+        movieInput.value = requestedTitle;
+        if (requestedMovieId) {
+            buscarDetalheFilme(requestedMovieId, requestedTitle);
+        } else {
+            buscarFilme();
+        }
+    }
 
     document.querySelectorAll("[data-avatar-editor]").forEach((editor) => {
         initAvatarEditor(editor);
